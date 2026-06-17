@@ -1,13 +1,78 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 interface HeatmapProps {
-  scores: { date: string; score: number }[]; // Daily scores
+  scores: { date: string; score: number }[];
   athleteName?: string;
   compact?: boolean;
   onCellClick?: (date: string) => void;
   selectedDate?: string;
-  startDate?: string; // registration created_at date
+  startDate?: string;
 }
+
+interface TooltipState {
+  date: string;
+  score: number | null;
+  x: number;
+  y: number;
+}
+
+// Portal tooltip — renders outside the overflow container so it never clips
+const HeatmapTooltip: React.FC<{ tip: TooltipState }> = ({ tip }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ left: tip.x, top: tip.y });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const { innerWidth, innerHeight } = window;
+    const { width, height } = el.getBoundingClientRect();
+    let left = tip.x - width / 2;
+    let top = tip.y - height - 10;
+    if (left < 6) left = 6;
+    if (left + width > innerWidth - 6) left = innerWidth - width - 6;
+    if (top < 6) top = tip.y + 20; // flip below if too close to top
+    if (top + height > innerHeight - 6) top = tip.y - height - 10;
+    setPos({ left, top });
+  }, [tip.x, tip.y]);
+
+  const label =
+    tip.score === null
+      ? "No Log"
+      : tip.score >= 85
+      ? "✅ Great"
+      : tip.score >= 60
+      ? "🟡 Moderate"
+      : "🔴 Critical";
+
+  return createPortal(
+    <div
+      ref={ref}
+      style={{ position: "fixed", left: pos.left, top: pos.top, zIndex: 9999, pointerEvents: "none" }}
+      className="px-3 py-2 bg-[hsl(var(--card))] border border-white/10 rounded-xl shadow-2xl whitespace-nowrap"
+    >
+      <p className="text-[10px] font-extrabold text-white/60 uppercase tracking-wider">{tip.date}</p>
+      <p className="text-xs font-black text-white mt-0.5">
+        Score:{" "}
+        <span
+          className={
+            tip.score === null
+              ? "text-white/40"
+              : tip.score >= 85
+              ? "text-emerald-400"
+              : tip.score >= 60
+              ? "text-amber-400"
+              : "text-rose-400"
+          }
+        >
+          {tip.score !== null ? `${tip.score}%` : "—"}
+        </span>
+      </p>
+      <p className="text-[9px] text-white/40 mt-0.5">{label}</p>
+    </div>,
+    document.body
+  );
+};
 
 export const AdherenceHeatmap: React.FC<HeatmapProps> = ({
   scores,
@@ -17,80 +82,84 @@ export const AdherenceHeatmap: React.FC<HeatmapProps> = ({
   selectedDate,
   startDate,
 }) => {
-  // Generate heatmap cells (12 weeks = 84 days) forward from start date
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+
+  const handleCellEnter = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>, date: string, score: number | null) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setTooltip({
+        date,
+        score,
+        x: rect.left + rect.width / 2,
+        y: rect.top,
+      });
+    },
+    []
+  );
+
+  const handleCellLeave = useCallback(() => setTooltip(null), []);
+
   const heatmapData = useMemo(() => {
     const cells: { date: string; score: number | null }[] = [];
     const scoreMap = new Map(scores.map((s) => [s.date, s.score]));
 
     let start: Date;
     if (startDate) {
-      start = new Date(startDate + "T00:00:00");
+      const [sy, sm, sd] = startDate.split("-").map(Number);
+      start = new Date(sy, sm - 1, sd);
     } else {
-      // Fallback behavior: count backwards 12 weeks from today
       const today = new Date();
-      start = new Date(today);
-      start.setDate(start.getDate() - 83);
+      start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 83);
     }
 
     for (let i = 0; i < 84; i++) {
-      const date = new Date(start);
-      date.setDate(date.getDate() + i);
+      const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
       const yyyy = date.getFullYear();
       const mm = String(date.getMonth() + 1).padStart(2, "0");
       const dd = String(date.getDate()).padStart(2, "0");
       const dateStr = `${yyyy}-${mm}-${dd}`;
-      cells.push({
-        date: dateStr,
-        score: scoreMap.get(dateStr) ?? null,
-      });
+      cells.push({ date: dateStr, score: scoreMap.get(dateStr) ?? null });
     }
-
     return cells;
   }, [scores, startDate]);
 
+  // Color: green=good (≥85), amber=moderate (≥60), red=critical (<60), grey=no log
   const getColorClass = (score: number | null): string => {
-    if (score === null) return "bg-card/40 border-card-border/40";
-    if (score >= 85)
-      return "bg-rose-500 border-rose-600/35 shadow-sm shadow-rose-500/20";
-    if (score >= 70)
-      return "bg-rose-600/70 border-rose-700/30 shadow-sm shadow-rose-600/10";
-    if (score >= 50) return "bg-rose-800/50 border-rose-850/20";
-    return "bg-rose-950/30 border-rose-900/20";
+    if (score === null) return "bg-white/5 border-white/8";
+    if (score >= 85) return "bg-emerald-500 border-emerald-400/40 shadow-sm shadow-emerald-500/25";
+    if (score >= 60) return "bg-amber-500/80 border-amber-400/35 shadow-sm shadow-amber-500/15";
+    return "bg-rose-500/80 border-rose-400/35 shadow-sm shadow-rose-500/15";
   };
 
   const days = ["S", "M", "T", "W", "T", "F", "S"];
 
   return (
-    <div className={`${compact ? "" : "glass-panel p-6 rounded-3xl"}`}>
+    <div className={compact ? "" : "glass-panel p-6 rounded-3xl"}>
       {!compact && (
-        <h3 className="text-sm font-extrabold uppercase tracking-wider text-white mb-6 flex items-center gap-2">
+        <h3 className="text-sm font-extrabold uppercase tracking-wider text-white mb-5 flex items-center gap-2">
           <span>📊 12-Week Adherence Heatmap</span>
           {athleteName && (
-            <span className="text-xs text-muted-foreground font-normal lowercase">
-              ({athleteName})
-            </span>
+            <span className="text-xs text-muted-foreground font-normal lowercase">({athleteName})</span>
           )}
         </h3>
       )}
 
-      <div className="flex items-center gap-3">
-        {/* Day labels column */}
-        <div className="flex flex-col gap-1.5 justify-between h-[116px] text-[10px] text-muted-foreground font-extrabold pr-1.5 select-none pt-0.5">
+      <div className="flex items-start gap-3">
+        {/* Day labels */}
+        <div className="flex flex-col gap-[5px] text-[9px] text-muted-foreground font-extrabold pr-1 select-none pt-0.5">
           {days.map((day, i) => (
-            <span key={i} className="h-3.5 flex items-center justify-center">
-              {day}
-            </span>
+            <span key={i} className="h-3.5 flex items-center">{day}</span>
           ))}
         </div>
 
-        {/* Heatmap Grid */}
-        <div className="overflow-x-auto pb-2 flex-1 scrollbar-thin">
+        {/* Grid */}
+        <div className="overflow-x-auto flex-1 pb-1" style={{ scrollbarWidth: "thin" }}>
           <div
-            className="inline-grid gap-1.5"
+            className="inline-grid gap-[5px]"
             style={{
-              gridTemplateRows: "repeat(7, minmax(0, 1fr))",
+              gridTemplateRows: "repeat(7, 14px)",
               gridAutoFlow: "column",
-              gridAutoColumns: "minmax(0, 1fr)",
+              gridAutoColumns: "14px",
             }}
           >
             {heatmapData.map((cell, idx) => {
@@ -98,37 +167,44 @@ export const AdherenceHeatmap: React.FC<HeatmapProps> = ({
               return (
                 <div
                   key={idx}
-                  onClick={() => onCellClick && onCellClick(cell.date)}
-                  className={`w-3.5 h-3.5 rounded-sm border transition-all duration-200 cursor-pointer hover:scale-115 relative group ${getColorClass(cell.score)} ${
-                    isSelected
-                      ? "ring-2 ring-white scale-110 shadow-[0_0_8px_rgba(255,255,255,0.5)] z-10"
-                      : ""
-                  }`}
-                >
-                  {/* Custom Tooltip */}
-                  <div className="pointer-events-none opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-card border border-card-border/80 text-[10px] font-semibold text-white rounded-xl whitespace-nowrap shadow-xl z-50 transition-opacity duration-200">
-                    <span className="block font-bold">{cell.date}</span>
-                    <span className="block text-primary">
-                      Score: {cell.score !== null ? `${cell.score}%` : "No Log"}
-                    </span>
-                  </div>
-                </div>
+                  onClick={() => onCellClick?.(cell.date)}
+                  onMouseEnter={(e) => handleCellEnter(e, cell.date, cell.score)}
+                  onMouseLeave={handleCellLeave}
+                  className={[
+                    "w-3.5 h-3.5 rounded-[3px] border transition-all duration-150 cursor-pointer",
+                    "hover:scale-[1.3] hover:z-10 relative",
+                    getColorClass(cell.score),
+                    isSelected ? "ring-2 ring-white ring-offset-1 ring-offset-transparent scale-125 z-20" : "",
+                  ].join(" ")}
+                />
               );
             })}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-2 text-[10px] text-muted-foreground uppercase font-bold mt-5 pr-2 select-none">
-        <span>Less Adherent</span>
-        <div className="flex gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm bg-rose-950/30 border border-rose-900/20" />
-          <div className="w-2.5 h-2.5 rounded-sm bg-rose-800/50 border border-rose-850/20" />
-          <div className="w-2.5 h-2.5 rounded-sm bg-rose-600/70 border border-rose-700/30" />
-          <div className="w-2.5 h-2.5 rounded-sm bg-rose-500 border border-rose-600/35" />
+      {/* Legend */}
+      <div className="flex items-center justify-end gap-3 mt-4 select-none">
+        <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wide">Less</span>
+        <div className="flex gap-1 items-center">
+          <div className="w-2.5 h-2.5 rounded-[3px] bg-white/5 border border-white/8" />
+          <div className="w-2.5 h-2.5 rounded-[3px] bg-rose-500/80 border border-rose-400/35" />
+          <div className="w-2.5 h-2.5 rounded-[3px] bg-amber-500/80 border border-amber-400/35" />
+          <div className="w-2.5 h-2.5 rounded-[3px] bg-emerald-500 border border-emerald-400/40" />
         </div>
-        <span>More Adherent</span>
+        <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wide">More</span>
+        <div className="flex items-center gap-1.5 ml-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block" />
+          <span className="text-[8px] text-rose-400/70 font-bold uppercase">Critical</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block ml-1.5" />
+          <span className="text-[8px] text-amber-400/70 font-bold uppercase">Moderate</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block ml-1.5" />
+          <span className="text-[8px] text-emerald-400/70 font-bold uppercase">Great</span>
+        </div>
       </div>
+
+      {/* Portal tooltip */}
+      {tooltip && <HeatmapTooltip tip={tooltip} />}
     </div>
   );
 };
