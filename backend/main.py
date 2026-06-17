@@ -8,6 +8,8 @@ from backend.app.routes import water_log_routes
 from backend.app.routes import supplement_log_routes
 from backend.app.routes import workout_log_routes
 from backend.app.routes import step_log_routes
+from backend.app.routes import weight_log_routes
+
 from backend.app.routes import athlete_target_routes
 from backend.app.routes import meal_history_routes
 from backend.app.routes import dashboard_routes
@@ -35,6 +37,8 @@ app.include_router(water_log_routes.router)
 app.include_router(supplement_log_routes.router)
 app.include_router(workout_log_routes.router)
 app.include_router(step_log_routes.router)
+app.include_router(weight_log_routes.router)
+
 app.include_router(athlete_target_routes.router)
 app.include_router(meal_history_routes.router)
 app.include_router(dashboard_routes.router)

@@ -6,7 +6,10 @@ import jwt
 from dotenv import load_dotenv
 
 # Load env variables explicitly
-load_dotenv()
+if os.path.exists("backend/.env"):
+    load_dotenv("backend/.env", override=True)
+else:
+    load_dotenv(override=True)
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

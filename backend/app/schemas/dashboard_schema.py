@@ -8,6 +8,14 @@ class DashboardSummaryResponse(BaseModel):
     supplements_completed: int
     supplements_total: int
     current_streak: int
+    weight: float
+    score: int
+    status: str
+    meals_logged: int
+    meals_target: int
+    steps_logged: int
+    cardio_logged: int
+    supplement_checkoffs: List[Dict[str, Any]]
 
 
 class SupplementDetail(BaseModel):

@@ -1,7 +1,7 @@
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from uuid import UUID
-from backend.app.models.meal_log_model import MealLog
+from backend.app.models.meal_logs import MealLog
 from backend.app.models.vision_api_call import VisionApiCalls
 
 class MealRepository:
@@ -21,24 +21,19 @@ class MealRepository:
         serving_size: float = None,
         is_edited: bool = False
     ) -> MealLog:
-        # Pack dynamic properties into confirmed_macros to align with database JSONB column
-        confirmed_macros = {
-            "calories": float(estimated_calories) if estimated_calories is not None else 0.0,
-            "protein": float(estimated_protein) if estimated_protein is not None else 0.0,
-            "carbs": float(estimated_carbs) if estimated_carbs is not None else 0.0,
-            "fat": float(estimated_fat) if estimated_fat is not None else 0.0,
-            "micronutrients": estimated_micronutrients or {},
-            "serving_size": float(serving_size) if serving_size is not None else 150.0,
-            "is_edited": is_edited,
-            "raw_vision_response": raw_vision_response
-        }
-
         db_meal = MealLog(
             athlete_id=athlete_id,
             photo_url=photo_url,
-            raw_food_log=food_name,
+            food_name=food_name,
+            raw_vision_response=raw_vision_response,
             confidence_score=float(confidence_score) if confidence_score is not None else None,
-            confirmed_macros=confirmed_macros
+            estimated_calories=float(estimated_calories) if estimated_calories is not None else 0.0,
+            estimated_protein=float(estimated_protein) if estimated_protein is not None else 0.0,
+            estimated_carbs=float(estimated_carbs) if estimated_carbs is not None else 0.0,
+            estimated_fat=float(estimated_fat) if estimated_fat is not None else 0.0,
+            estimated_micronutrients=estimated_micronutrients or {},
+            serving_size=float(serving_size) if serving_size is not None else 150.0,
+            is_edited=is_edited
         )
         db.add(db_meal)
         db.commit()

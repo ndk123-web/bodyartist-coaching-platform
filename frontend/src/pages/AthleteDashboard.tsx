@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Camera, Droplet, Flame, Scale, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { apiClient } from '../api/client';
 import { AdherenceHeatmap } from '../components/AdherenceHeatmap';
 import { SimpleLineChart } from '../components/SimpleLineChart';
 
@@ -12,7 +13,6 @@ interface AthleteDashboardProps {
 export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const name = useAuthStore((state) => state.name);
-  const email = useAuthStore((state) => state.email);
   const id = useAuthStore((state) => state.id);
 
   const handleLogout = () => {
@@ -20,33 +20,23 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
     navigate('/');
   };
 
-  // Scoped localStorage persistence
-  const storageKey = `athlete-data-${email || 'guest'}`;
-
   // State initialization
-  const [waterLogged, setWaterLogged] = useState<number>(3);
+  const [waterLogged, setWaterLogged] = useState<number>(0);
   const [waterTarget, setWaterTarget] = useState<number>(8);
   const [mealsTarget, setMealsTarget] = useState<number>(5);
   
-  const [stepsLogged, setStepsLogged] = useState<number>(6000);
+  const [stepsLogged, setStepsLogged] = useState<number>(0);
   const [stepsTarget, setStepsTarget] = useState<number>(10000);
-  const [cardioLogged, setCardioLogged] = useState<number>(15);
+  const [cardioLogged, setCardioLogged] = useState<number>(0);
   const [cardioTarget, setCardioTarget] = useState<number>(30);
-  const [weight, setWeight] = useState<number>(82.4);
+  const [weight, setWeight] = useState<number>(0);
 
-  const [supplements, setSupplements] = useState([
-    { id: '1', name: 'Creatine Monohydrate', completed: true, required: true },
-    { id: '2', name: 'Omega 3 Fish Oil', completed: false, required: true },
-    { id: '3', name: 'Multivitamin Formula', completed: true, required: true },
-  ]);
+  const [supplements, setSupplements] = useState<any[]>([]);
 
-  const [targetMacros, setTargetMacros] = useState({ p: 200, c: 250, f: 75, cal: 2475 });
+  const [targetMacros] = useState({ p: 200, c: 250, f: 75, cal: 2475 });
 
 
-  const [meals, setMeals] = useState([
-    { id: '1', time: '08:30', food: 'Oatmeal with Protein & Berries', macros: { p: 32, f: 6, c: 45 }, calories: 362, photo: null as string | null, confidence: 91, isEdited: false },
-    { id: '2', time: '14:15', food: 'Grilled Chicken Breast & Rice', macros: { p: 48, f: 8, c: 52 }, calories: 472, photo: null as string | null, confidence: 85, isEdited: false },
-  ]);
+  const [meals, setMeals] = useState<any[]>([]);
 
   const [weightHistory, setWeightHistory] = useState([
     { date: '06-05', value: 83.1 },
@@ -57,150 +47,106 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
     { date: '06-10', value: 82.4 },
   ]);
 
-  // Load from localStorage if present
-  useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (typeof parsed.waterLogged === 'number') setWaterLogged(parsed.waterLogged);
-        if (Array.isArray(parsed.supplements)) setSupplements(parsed.supplements);
-        if (Array.isArray(parsed.meals)) setMeals(parsed.meals);
-        if (typeof parsed.stepsLogged === 'number') setStepsLogged(parsed.stepsLogged);
-        if (typeof parsed.cardioLogged === 'number') setCardioLogged(parsed.cardioLogged);
-        if (typeof parsed.weight === 'number') setWeight(parsed.weight);
-        if (Array.isArray(parsed.weightHistory)) setWeightHistory(parsed.weightHistory);
-      } catch (err) {
-        console.error('Failed to parse saved athlete telemetry data', err);
-      }
-    }
-  }, [storageKey]);
-
-  // Load from database if athlete is authenticated
+  // Load from API on mount
   useEffect(() => {
     if (!id) return;
+    const loadDashboard = async () => {
+      try {
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // Parallel requests
+        const [targets, summary, mealsRes, historyRes] = await Promise.all([
+          apiClient.get(`/api/v1/athlete/targets/${id}`),
+          apiClient.get(`/api/v1/athlete/dashboard-summary/${id}`),
+          apiClient.get(`/api/v1/meals/today/${id}`),
+          apiClient.get(`/api/v1/athlete/history-timeline/${id}?start_date=${todayStr}&end_date=${todayStr}`)
+        ]);
 
-    // 1. Fetch Diet Plan Targets
-    fetch(`http://localhost:8000/api/v1/athlete/targets/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Targets not found');
-        return res.json();
-      })
-      .then(data => {
-        if (data) {
-          setMealsTarget(data.target_meals || 5);
-          setWaterTarget(data.water_target || 8);
-          setStepsTarget(data.steps_target || 10000);
-          setCardioTarget(data.cardio_target || 30);
-          
-          if (Array.isArray(data.target_macros)) {
-            let p = 0, c = 0, f = 0;
-            data.target_macros.forEach((m: any) => {
-              const name = m.name?.toLowerCase();
-              if (name === 'protein') p = m.value;
-              else if (name === 'carbs') c = m.value;
-              else if (name === 'fat') f = m.value;
-            });
-            const cal = p * 4 + c * 4 + f * 9;
-            setTargetMacros({ p, c, f, cal });
-          }
-
-          if (Array.isArray(data.supplement_checklist)) {
-            setSupplements(prevSupps => {
-              return data.supplement_checklist.map((s: any, idx: number) => {
-                const existing = prevSupps.find(p => p.name.toLowerCase() === s.name.toLowerCase());
-                return {
-                  id: (idx + 1).toString(),
-                  name: s.name,
-                  completed: existing ? existing.completed : false,
-                  required: s.required
-                };
-              });
-            });
-          }
+        // 1. Targets
+        setWaterTarget(targets.water_target || 8);
+        setMealsTarget(targets.meals_target || 5);
+        setStepsTarget(targets.steps_target || 10000);
+        setCardioTarget(targets.cardio_target || 30);
+        
+        // 2. Supplements (Merge targets checklist with summary checkoffs)
+        if (targets.supplement_checklist && Array.isArray(targets.supplement_checklist)) {
+           const checkedIds = summary.supplement_checkoffs?.map((s: any) => s.id) || [];
+           const mergedSupps = targets.supplement_checklist.map((s: any) => ({
+             ...s,
+             completed: checkedIds.includes(s.id)
+           }));
+           setSupplements(mergedSupps);
         }
-      })
-      .catch(err => console.warn('Could not fetch diet targets from server:', err));
 
-    // 2. Fetch today's meal logs from the database
-    fetch(`http://localhost:8000/api/v1/meals/today/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Meal logs not found');
-        return res.json();
-      })
-      .then(data => {
-        if (data && Array.isArray(data.meals)) {
-          const mappedMeals = data.meals.map((m: any, idx: number) => {
-            const macros = m.confirmed_macros || {};
-            return {
-              id: m.id || (idx + 1).toString(),
-              time: new Date(m.logged_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-              food: m.raw_food_log || 'Unknown Meal',
-              macros: {
-                p: macros.protein || 0,
-                c: macros.carbs || 0,
-                f: macros.fat || 0
-              },
-              calories: macros.calories || 0,
-              photo: m.photo_url || null,
-              confidence: Math.round((m.confidence_score || 0) * 100),
-              isEdited: macros.is_edited || false
-            };
-          });
-          setMeals(mappedMeals);
+        // 3. Summary 
+        setWaterLogged(summary.water_logged || 0);
+        setStepsLogged(summary.steps_logged || 0);
+        setCardioLogged(summary.cardio_logged || 0);
+        
+        if (summary.weight) setWeight(summary.weight);
+        setScoreMetrics({ totalScore: summary.score || 0, status: summary.status || 'red' });
+
+        // 4. Meals
+        if (mealsRes && Array.isArray(mealsRes.meals)) {
+           setMeals(mealsRes.meals.map((m: any) => ({
+             id: m.id,
+             time: new Date(m.logged_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+             food: m.food_name,
+             macros: { p: m.estimated_protein, f: m.estimated_fat, c: m.estimated_carbs },
+             calories: m.estimated_calories,
+             photo: m.photo_url,
+             confidence: m.confidence_score * 100,
+             isEdited: m.is_edited
+           })));
         }
-      })
-      .catch(err => console.warn('Could not fetch meal logs from server:', err));
 
+        // 5. Weight History
+        if (historyRes && Array.isArray(historyRes.weight_history)) {
+           setWeightHistory(historyRes.weight_history.map((w: any) => ({
+             date: w.date.substring(5), // '06-05'
+             value: w.weight
+           })));
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard data', err);
+      }
+
+    };
+    loadDashboard();
   }, [id]);
 
-  // Save to localStorage helper
-  const saveTelemetry = (updates: any) => {
-    const current = {
-      waterLogged,
-      supplements,
-      meals,
-      stepsLogged,
-      cardioLogged,
-      weight,
-      weightHistory
-    };
-    localStorage.setItem(storageKey, JSON.stringify({ ...current, ...updates }));
+  // Sync to API helper (Replacing localStorage)
+  const saveTelemetry = async (updates: any) => {
+    if (!id) return;
+    const logDate = new Date().toISOString().split('T')[0];
+    
+    try {
+      if (updates.waterLogged !== undefined) {
+        await apiClient.put('/api/v1/logs/water', { athlete_id: id, log_date: logDate, water_logged: updates.waterLogged });
+      }
+      if (updates.supplements !== undefined) {
+        await apiClient.put('/api/v1/logs/supplements', { 
+           athlete_id: id, 
+           log_date: logDate, 
+           checked_supplements: updates.supplements.filter((s:any) => s.completed).map((s:any) => s.name)
+        });
+      }
+      if (updates.stepsLogged !== undefined) {
+        await apiClient.put('/api/v1/logs/steps', { athlete_id: id, log_date: logDate, steps_logged: updates.stepsLogged });
+      }
+      if (updates.cardioLogged !== undefined) {
+        await apiClient.put('/api/v1/logs/workout', { athlete_id: id, log_date: logDate, cardio_logged: updates.cardioLogged, workout_completed: true });
+      }
+      if (updates.weight !== undefined) {
+        await apiClient.put('/api/v1/logs/weight', { athlete_id: id, log_date: logDate, weight: updates.weight });
+      }
+    } catch (err) {
+      console.error("Failed to sync telemetry to backend", err);
+    }
   };
 
-  // Dynamic Score Calculation
+  const [scoreMetrics, setScoreMetrics] = useState({ totalScore: 0, status: 'red' });
   const mealsLogged = meals.length;
-  
-  const scoreMetrics = useMemo(() => {
-    // 1. Meal Adherence (50%)
-    const mealScore = Math.min(100, (mealsLogged / mealsTarget) * 100);
-    
-    // 2. Supplements (20%)
-    const requiredSupps = supplements.filter(s => s.required);
-    const completedRequiredSupps = requiredSupps.filter(s => s.completed).length;
-    const suppScore = requiredSupps.length > 0 
-      ? (completedRequiredSupps / requiredSupps.length) * 100 
-      : 100;
-      
-    // 3. Hydration (15%) - 100 if target met, else 0
-    const waterScore = waterLogged >= waterTarget ? 100 : 0;
-    
-    // 4. Cardio / Steps (15%)
-    const stepsPct = Math.min(100, (stepsLogged / stepsTarget) * 100);
-    const cardioPct = Math.min(100, (cardioLogged / cardioTarget) * 100);
-    const workoutScore = (stepsPct + cardioPct) / 2;
-
-    // Weighted Score
-    const totalScore = Math.round((mealScore * 0.50) + (suppScore * 0.20) + (waterScore * 0.15) + (workoutScore * 0.15));
-    
-    // Status Bucket
-    let status: 'green' | 'yellow' | 'orange' | 'red' = 'red';
-    if (totalScore >= 85) status = 'green';
-    else if (totalScore >= 70) status = 'yellow';
-    else if (totalScore >= 50) status = 'orange';
-
-    return { totalScore, status };
-  }, [mealsLogged, mealsTarget, supplements, waterLogged, waterTarget, stepsLogged, stepsTarget, cardioLogged, cardioTarget]);
 
   // Accumulated totals
   const totalMacros = useMemo(() => {
@@ -266,19 +212,14 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
 
     const formData = new FormData();
     formData.append("image", file);
-    formData.append("athlete_id", id || "00000000-0000-0000-0000-000000000000"); // placeholder if not logged in
+    if (!id) {
+      console.error("Athlete ID is missing");
+      return;
+    }
+    formData.append("athlete_id", id);
 
     try {
-      const response = await fetch("http://localhost:8000/api/meals/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload and recognize meal");
-      }
-
-      const data = await response.json();
+      const data = await apiClient.post("/api/meals/upload", formData);
       
       setTempImage(data.photo_url);
       setInitialMacros({
@@ -325,8 +266,18 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                      mealFormData.macros.c !== initialMacros.c ||
                      mealFormData.macros.f !== initialMacros.f;
 
+    if (!id) {
+      console.error("Athlete ID is missing");
+      return;
+    }
+
+    if (!mealFormData.food.trim()) {
+      alert("Food name cannot be empty");
+      return;
+    }
+
     const payload = {
-      athlete_id: id || "00000000-0000-0000-0000-000000000000",
+      athlete_id: id,
       food_name: mealFormData.food,
       photo_url: tempImage,
       raw_vision_response: mealFormData.rawVisionResponse,
@@ -348,19 +299,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
     };
 
     try {
-      const response = await fetch("http://localhost:8000/api/meals/confirm", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save confirmed meal");
-      }
-
-      const dbResult = await response.json();
+      const dbResult = await apiClient.post("/api/meals/confirm", payload);
 
       const newMeal = {
         id: dbResult.meal_id || (meals.length + 1).toString(),
@@ -936,8 +875,8 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                           const p = Number(e.target.value);
                           setMealFormData({
                             ...mealFormData,
-                            macros: { ...mealFormData.macros, p },
-                            calories: Math.round(p * 4 + mealFormData.macros.c * 4 + mealFormData.macros.f * 9)
+                            macros: { ...mealFormData.macros, p: Math.max(0, p) },
+                            calories: Math.round(Math.max(0, p) * 4 + mealFormData.macros.c * 4 + mealFormData.macros.f * 9)
                           });
                         }}
                         className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
@@ -953,8 +892,8 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                           const c = Number(e.target.value);
                           setMealFormData({
                             ...mealFormData,
-                            macros: { ...mealFormData.macros, c },
-                            calories: Math.round(mealFormData.macros.p * 4 + c * 4 + mealFormData.macros.f * 9)
+                            macros: { ...mealFormData.macros, c: Math.max(0, c) },
+                            calories: Math.round(mealFormData.macros.p * 4 + Math.max(0, c) * 4 + mealFormData.macros.f * 9)
                           });
                         }}
                         className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
@@ -970,8 +909,8 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                           const f = Number(e.target.value);
                           setMealFormData({
                             ...mealFormData,
-                            macros: { ...mealFormData.macros, f },
-                            calories: Math.round(mealFormData.macros.p * 4 + mealFormData.macros.c * 4 + f * 9)
+                            macros: { ...mealFormData.macros, f: Math.max(0, f) },
+                            calories: Math.round(mealFormData.macros.p * 4 + mealFormData.macros.c * 4 + Math.max(0, f) * 9)
                           });
                         }}
                         className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"

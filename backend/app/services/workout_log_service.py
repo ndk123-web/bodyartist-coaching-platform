@@ -13,12 +13,12 @@ class WorkoutLogService:
             athlete_id=data.athlete_id, 
             log_date=data.log_date, 
             workout_completed=data.workout_completed,
-            cardio_completed=data.cardio_completed
+            cardio_logged=data.cardio_logged
         )
 
         return WorkoutLogResponse(
             athlete_id=daily_log.athlete_id,
             log_date=daily_log.log_date,
             workout_completed=daily_log.workout_completed,
-            cardio_completed=daily_log.cardio_completed
+            cardio_logged=daily_log.cardio_logged
         )

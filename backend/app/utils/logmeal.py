@@ -11,6 +11,18 @@ class LogMeal:
         Uploads an image file to LogMeal and returns the segmentation/recognition response 
         containing the imageId and the list of detected dishes.
         """
+        if self.token == "your_logmeal_token_here" or not self.token:
+            return {
+                "imageId": 123456,
+                "segmentation_results": [
+                    {
+                        "recognition_results": [
+                            {"id": 101, "name": "Grilled Chicken Salad", "prob": 0.98}
+                        ]
+                    }
+                ]
+            }
+
         url = f"{self.base_url}/image/segmentation/complete"
         headers = {
             "Authorization": f"Bearer {self.token}"
@@ -27,7 +39,11 @@ class LogMeal:
         """
         Confirms the dish name / ID returned from recognition.
         """
+        if self.token == "your_logmeal_token_here" or not self.token:
+            return {"message": "Dish confirmed successfully in mock mode."}
+
         url = f"{self.base_url}/image/confirm/dish"
+
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json"
@@ -65,7 +81,27 @@ class LogMeal:
         """
         Retrieves the macronutrient and micronutrient information based on the confirmed imageId.
         """
+        if self.token == "your_logmeal_token_here" or not self.token:
+            return {
+                "nutritional_info": {
+                    "calories": 450,
+                    "totalNutrients": {
+                        "PROCNT": {"quantity": 35},
+                        "CHOCDF": {"quantity": 15},
+                        "FAT": {"quantity": 20},
+                        "FIBTG": {"quantity": 5},
+                        "FE": {"quantity": 2},
+                        "CA": {"quantity": 100},
+                        "K": {"quantity": 400},
+                        "MG": {"quantity": 50},
+                        "VITB12": {"quantity": 1.5}
+                    }
+                }
+            }
+
         url = f"{self.base_url}/nutrition/recipe/nutritionalInfo"
+        print(f"Logmeal URL: {url}")
+            
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json"

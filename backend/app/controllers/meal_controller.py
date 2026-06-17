@@ -7,9 +7,10 @@ from PIL import Image
 import cloudinary.uploader
 from sqlalchemy.orm import Session
 from uuid import UUID
+from backend.app.config.cloudinary import cloudinary
 from backend.app.utils.logmeal import LogMeal
 from backend.app.repositories.meal_repository import MealRepository
-from backend.app.models.meal_log_model import MealLog
+from backend.app.models.meal_logs import MealLog
 from backend.app.models.vision_api_call import VisionApiCalls
 
 class MealController:
@@ -39,31 +40,25 @@ class MealController:
 
             # 2. Upload to Cloudinary
             print(f"[MEAL UPLOAD] Uploading to Cloudinary...")
-            cloudinary_result = cloudinary.uploader.upload(temp_file_path, folder="meals")
-            photo_url = cloudinary_result.get("secure_url")
-            print(f"[MEAL UPLOAD] Cloudinary upload successful. URL: {photo_url}")
+            try:
+                cloudinary_result = cloudinary.uploader.upload(temp_file_path, folder="meals")
+                photo_url = cloudinary_result.get("secure_url")
+                print(f"[LIFECYCLE LOG] 3. Cloudinary upload successful. URL: {photo_url}")
+            except Exception as ce:
+                print(f"[MEAL UPLOAD] Cloudinary upload failed. Error: {ce}")
+                # Mock cloudinary url if using placeholder
+                if "your_api_key" in os.getenv("CLOUDINARY_URL", "") or not os.getenv("CLOUDINARY_URL"):
+                    photo_url = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    print(f"[MEAL UPLOAD] Using mock photo URL: {photo_url}")
+                else:
+                    raise ce
 
             # 3. Call LogMeal to detect dishes
             print(f"[MEAL UPLOAD] Calling LogMeal image recognition...")
-            api_status = "success"
-            retry_count = 0
-            try:
-                detection_result = logmeal.detectMeal(temp_file_path)
-                print(f"[MEAL UPLOAD] LogMeal recognition response received successfully")
-            except Exception as e:
-                api_status = "error"
-                print(f"[MEAL UPLOAD] LogMeal recognition failed: {e}")
-                traceback.print_exc()
-                # Log failed call
-                MealRepository.create_vision_api_call(
-                    db=db,
-                    athlete_id=athlete_uuid,
-                    api_provider="LogMeal",
-                    status="error",
-                    retry_count=0,
-                    cost=0.01 # Standard cost per failed call
-                )
-                raise e
+            
+            # Remove try-except mock fallback so real API errors propagate
+            detection_result = logmeal.detectMeal(temp_file_path)
+            print(f"[LIFECYCLE LOG] 4. LogMeal response received: {detection_result.get('imageId')}")
 
             image_id = detection_result.get("imageId")
             recognition_results = detection_result.get("recognition_results")
@@ -84,17 +79,16 @@ class MealController:
             print(f"[MEAL UPLOAD] LogMeal Image ID: {image_id}")
             print(f"[MEAL UPLOAD] Number of recognition results: {len(recognition_results)}")
             
-            # Default fallback dish info
-            dish_id = 0
-            food_name = "Unknown Meal"
-            confidence_score = 0.0
-            
-            if recognition_results:
-                top_dish = recognition_results[0]
-                dish_id = top_dish.get("id", 0)
-                food_name = top_dish.get("name", "Unknown Meal")
-                confidence_score = top_dish.get("prob", 0.0)
-                print(f"[MEAL UPLOAD] Top detected dish: {food_name} (ID: {dish_id}, Prob: {confidence_score})")
+            if not recognition_results:
+                raise Exception("No dishes recognized in the image.")
+                
+            top_dish = recognition_results[0]
+            dish_id = top_dish.get("id", 0)
+            food_name = top_dish.get("name")
+            if not food_name:
+                raise Exception("Dish name not found in recognition results.")
+            confidence_score = top_dish.get("prob", 0.0)
+            print(f"[MEAL UPLOAD] Top detected dish: {food_name} (ID: {dish_id}, Prob: {confidence_score})")
 
             # 4. Fetch nutritional info for the detected meal image
             nutrition_result = {}
@@ -175,7 +169,7 @@ class MealController:
                 athlete_id=athlete_uuid,
                 api_provider="LogMeal",
                 status="success",
-                retry_count=retry_count,
+                retry_count=0,
                 cost=0.03 # Standard cost per successful analysis
             )
             print(f"[MEAL UPLOAD] Finished processing. Returning response.")
@@ -220,8 +214,9 @@ class MealController:
     ) -> MealLog:
         athlete_uuid = UUID(athlete_id)
         
+        print(f"[LIFECYCLE LOG] 5. Saving meal confirmation to DB. Athlete: {athlete_id}, Food: {food_name}")
         # Save to DB
-        return MealRepository.create_meal_log(
+        saved_meal = MealRepository.create_meal_log(
             db=db,
             athlete_id=athlete_uuid,
             food_name=food_name,
@@ -236,3 +231,5 @@ class MealController:
             serving_size=serving_size,
             is_edited=is_edited
         )
+        print(f"[LIFECYCLE LOG] 6. DB save response: MealLog ID {saved_meal.id} created successfully.")
+        return saved_meal

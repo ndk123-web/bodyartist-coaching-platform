@@ -6,7 +6,7 @@ import datetime
 from backend.app.config.database import Base
 
 
-class MealLog():
+class MealLog(Base):
     __tablename__ = "meal_logs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

@@ -166,27 +166,28 @@ class AuthController:
         
         athletes = UserRepository.get_athletes_by_coach(db, coach_uuid)
         
-        # Format output to match frontend expectations
+        # Format output to match frontend expectations using real dashboard service data
+        from backend.app.services.dashboard_service import DashboardService
+        dashboard_service = DashboardService(db)
+        
         result = []
         for athlete in athletes:
+            # Use dashboard service to get accurate real-time data
+            detail = dashboard_service.get_coach_athlete_detail(athlete.id)
             result.append({
-                "id": str(athlete.id),
-                "name": athlete.name,
-                "email": athlete.email,
-                "score": 0,
-                "streak": 0,
-                "weight": 80.0,  # default / placeholder
-                "waterLog": 0,
-                "waterTarget": 8,
-                "mealsLogged": 0,
-                "mealsTarget": 5,
-                "status": "red",
-                "supplements": [
-                    { "name": "Creatine Monohydrate", "completed": False, "required": True },
-                    { "name": "Omega 3 Fish Oil", "completed": False, "required": True },
-                    { "name": "Multivitamin Formula", "completed": False, "required": True }
-                ],
-                "mealHistory": []
+                "id": str(detail.id),
+                "name": detail.name,
+                "email": detail.email,
+                "score": detail.score,
+                "streak": detail.streak,
+                "weight": detail.weight,
+                "waterLog": detail.waterLog,
+                "waterTarget": detail.waterTarget,
+                "mealsLogged": detail.mealsLogged,
+                "mealsTarget": detail.mealsTarget,
+                "status": detail.status,
+                "supplements": [s.model_dump() for s in detail.supplements],
+                "mealHistory": [m.model_dump() for m in detail.mealHistory]
             })
         return result
 

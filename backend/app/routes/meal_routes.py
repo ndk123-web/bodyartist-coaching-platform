@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import traceback
 from backend.app.config.database import get_db
 from backend.app.controllers.meal_controller import MealController
@@ -12,13 +12,13 @@ class MealConfirmRequest(BaseModel):
     food_name: str
     photo_url: str | None = None
     raw_vision_response: dict | None = None
-    confidence_score: float | None = None
-    estimated_calories: float | None = None
-    estimated_protein: float | None = None
-    estimated_carbs: float | None = None
-    estimated_fat: float | None = None
+    confidence_score: float = Field(default=0.0, ge=0.0)
+    estimated_calories: float = Field(default=0.0, ge=0.0)
+    estimated_protein: float = Field(default=0.0, ge=0.0)
+    estimated_carbs: float = Field(default=0.0, ge=0.0)
+    estimated_fat: float = Field(default=0.0, ge=0.0)
     estimated_micronutrients: dict | None = None
-    serving_size: float | None = None
+    serving_size: float = Field(default=150.0, ge=0.0)
     is_edited: bool = False
 
 @router.post("/upload")
@@ -28,7 +28,10 @@ async def upload_meal_photo(
     db: Session = Depends(get_db)
 ):
     try:
+        print(f"\n=============================================")
+        print(f"[LIFECYCLE LOG] 1. Request received at /api/meals/upload for athlete: {athlete_id}")
         content = await image.read()
+        print(f"[LIFECYCLE LOG] 2. Image uploaded. Size: {len(content)} bytes")
         result = MealController.upload_and_detect(db=db, file_content=content, athlete_id=athlete_id)
         return result
     except Exception as e:

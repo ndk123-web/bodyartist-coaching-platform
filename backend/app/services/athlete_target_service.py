@@ -45,11 +45,11 @@ class AthleteTargetService:
             
         data = {
             "athlete_id": diet_plan.athlete_id,
-            "meals_target": diet_plan.meals_target,
-            "water_target": diet_plan.water_target,
-            "steps_target": diet_plan.steps_target,
-            "cardio_target": diet_plan.cardio_target,
-            "tolerance_percent": diet_plan.tolerance_percent,
+            "meals_target": diet_plan.meals_target or 5,
+            "water_target": diet_plan.water_target or 8,
+            "steps_target": diet_plan.steps_target or 10000,
+            "cardio_target": diet_plan.cardio_target or 30,
+            "tolerance_percent": diet_plan.tolerance_percent or 0,
             "target_macros": normalized_macros,
             "supplement_checklist": diet_plan.supplement_checklist or []
         }

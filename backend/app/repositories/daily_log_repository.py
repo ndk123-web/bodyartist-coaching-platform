@@ -47,7 +47,7 @@ class DailyLogRepository:
         db.refresh(daily_log)
         return daily_log
 
-    def upsert_workout_log(self, db, athlete_id: UUID, log_date: date, workout_completed: bool, cardio_completed: bool) -> DailyLog:
+    def upsert_workout_log(self, db, athlete_id: UUID, log_date: date, workout_completed: bool, cardio_logged: int) -> DailyLog:
         daily_log = db.query(DailyLog).filter(
             DailyLog.athlete_id == athlete_id,
             DailyLog.log_date == log_date
@@ -55,13 +55,13 @@ class DailyLogRepository:
 
         if daily_log:
             daily_log.workout_completed = workout_completed
-            daily_log.cardio_completed = cardio_completed
+            daily_log.cardio_logged = cardio_logged
         else:
             daily_log = DailyLog(
                 athlete_id=athlete_id,
                 log_date=log_date,
                 workout_completed=workout_completed,
-                cardio_completed=cardio_completed
+                cardio_logged=cardio_logged
             )
             db.add(daily_log)
         
@@ -82,6 +82,26 @@ class DailyLogRepository:
                 athlete_id=athlete_id,
                 log_date=log_date,
                 steps_logged=steps_logged
+            )
+            db.add(daily_log)
+        
+        db.commit()
+        db.refresh(daily_log)
+        return daily_log
+
+    def upsert_weight_log(self, db, athlete_id: UUID, log_date: date, weight: float) -> DailyLog:
+        daily_log = db.query(DailyLog).filter(
+            DailyLog.athlete_id == athlete_id,
+            DailyLog.log_date == log_date
+        ).first()
+
+        if daily_log:
+            daily_log.weight = weight
+        else:
+            daily_log = DailyLog(
+                athlete_id=athlete_id,
+                log_date=log_date,
+                weight=weight
             )
             db.add(daily_log)
         

@@ -38,18 +38,76 @@ class DashboardService:
         supplements_completed = 0
         supplements_total = 0
 
+        from backend.app.models.meal_logs import MealLog
+        from sqlalchemy import cast, Date
+
         if diet_plan and diet_plan.supplement_checklist:
             required_supps = [
                 s for s in diet_plan.supplement_checklist if s.get("required")
             ]
             supplements_total = len(required_supps)
 
-        if daily_log and daily_log.supplement_checkoffs:
-            # checkoffs array is assumed to only contain completed items
-            supplements_completed = sum(
-                1 for s in daily_log.supplement_checkoffs if s.get("completed")
+        weight = 80.0
+        status = "red"
+
+        if daily_log:
+            if daily_log.supplement_checkoffs:
+                supplements_completed = sum(
+                    1 for s in daily_log.supplement_checkoffs if s.get("completed")
+                )
+            water_logged = daily_log.water_logged or 0
+            weight = float(daily_log.weight) if daily_log.weight is not None else 80.0
+
+        meals_target = diet_plan.meals_target if (diet_plan and diet_plan.meals_target) else 5
+        water_target = diet_plan.water_target if (diet_plan and diet_plan.water_target) else 8
+        steps_target = diet_plan.steps_target if (diet_plan and diet_plan.steps_target) else 10000
+        cardio_target = diet_plan.cardio_target if (diet_plan and diet_plan.cardio_target) else 30
+
+        from datetime import datetime, time
+        today_start = datetime.combine(today, time.min)
+        today_end = datetime.combine(today, time.max)
+
+        today_meals = (
+            self.db.query(MealLog)
+            .filter(
+                MealLog.athlete_id == athlete_id,
+                MealLog.logged_at >= today_start,
+                MealLog.logged_at <= today_end
             )
-            water_logged = daily_log.water_logged
+            .all()
+        )
+        meals_logged = len(today_meals)
+
+        steps_logged = daily_log.steps_logged if daily_log else 0
+        cardio_logged = daily_log.cardio_logged if daily_log else 0
+
+        # Recalculate score dynamically
+        meal_score = (min(100.0, (meals_logged / meals_target) * 100.0) if meals_target > 0 else 100.0)
+        supp_score = ((supplements_completed / supplements_total) * 100.0 if supplements_total > 0 else 100.0)
+        water_score = (min(100.0, (water_logged / water_target) * 100.0) if water_target > 0 else 100.0)
+        
+        steps_pct = (min(100.0, (steps_logged / steps_target) * 100.0) if steps_target > 0 else 100.0)
+        cardio_pct = (min(100.0, (cardio_logged / cardio_target) * 100.0) if cardio_target > 0 else 100.0)
+        workout_score = (steps_pct + cardio_pct) / 2.0
+
+        total_score = int(round((meal_score * 0.50) + (supp_score * 0.20) + (water_score * 0.15) + (workout_score * 0.15)))
+
+        if total_score >= 85:
+            status = "green"
+        elif total_score >= 70:
+            status = "yellow"
+        elif total_score >= 50:
+            status = "orange"
+        else:
+            status = "red"
+
+        # Update daily log with new score if exists
+        if daily_log:
+            daily_log.score = total_score
+            daily_log.status = status
+            self.db.commit()
+
+        supplement_checkoffs = daily_log.supplement_checkoffs if daily_log else []
 
         return DashboardSummaryResponse(
             athlete_id=athlete_id,
@@ -57,11 +115,19 @@ class DashboardService:
             supplements_completed=supplements_completed,
             supplements_total=supplements_total,
             current_streak=current_streak,
+            weight=weight,
+            score=total_score,
+            status=status,
+            meals_logged=meals_logged,
+            meals_target=meals_target,
+            steps_logged=steps_logged,
+            cardio_logged=cardio_logged,
+            supplement_checkoffs=supplement_checkoffs
         )
 
     def get_coach_athlete_detail(self, athlete_id: UUID, log_date: date = None) -> AthleteDetailResponse:
         from backend.app.repositories.user_repository import UserRepository
-        from backend.app.models.meal_log_model import MealLog
+        from backend.app.models.meal_logs import MealLog
         from sqlalchemy import cast, Date
 
         # 1. Fetch user (athlete)
@@ -118,11 +184,17 @@ class DashboardService:
             weight = 80.0
             supplement_checkoffs = []
 
-        # 4. Fetch today's meal logs from DB
+        from datetime import datetime, time
+        today_start = datetime.combine(today, time.min)
+        today_end = datetime.combine(today, time.max)
+
+        # 4. Fetch meal history for today
         today_meals = (
             self.db.query(MealLog)
             .filter(
-                MealLog.athlete_id == athlete_id, cast(MealLog.logged_at, Date) == today
+                MealLog.athlete_id == athlete_id,
+                MealLog.logged_at >= today_start,
+                MealLog.logged_at <= today_end
             )
             .order_by(MealLog.logged_at.desc())
             .all()
@@ -132,12 +204,10 @@ class DashboardService:
         # 5. Format today's meal history timeline
         meal_history = []
         for m in today_meals:
-            # Safely get macros from JSONB confirmed_macros
-            macros = m.confirmed_macros or {}
-            protein = macros.get("protein", 0)
-            carbs = macros.get("carbs", 0)
-            fat = macros.get("fat", 0)
-            calories = macros.get("calories", 0)
+            protein = m.estimated_protein or 0
+            carbs = m.estimated_carbs or 0
+            fat = m.estimated_fat or 0
+            calories = m.estimated_calories or 0
             if not calories:
                 calories = int(protein * 4 + carbs * 4 + fat * 9)
 
@@ -145,12 +215,12 @@ class DashboardService:
                 MealHistoryDetail(
                     id=str(m.id),
                     time=m.logged_at.strftime("%H:%M"),
-                    food=m.raw_food_log or "Unknown Meal",
+                    food=m.food_name or "Unknown Meal",
                     macros={"p": int(protein), "c": int(carbs), "f": int(fat)},
                     calories=int(calories),
                     photo=m.photo_url,
                     confidence=int((m.confidence_score or 0.0) * 100),
-                    isEdited=macros.get("is_edited", False),
+                    isEdited=m.is_edited or False,
                 )
             )
 
@@ -185,7 +255,7 @@ class DashboardService:
             else 100.0
         )
         # C. Hydration (15%)
-        water_score = 100.0 if water_logged >= water_target else 0.0
+        water_score = (min(100.0, (water_logged / water_target) * 100.0) if water_target > 0 else 100.0)
         # D. Workout (15%)
         steps_pct = (
             min(100.0, (steps_logged / steps_target) * 100.0)

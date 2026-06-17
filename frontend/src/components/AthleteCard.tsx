@@ -23,8 +23,13 @@ interface AthleteCardProps {
 }
 
 export const AthleteCard: React.FC<AthleteCardProps> = ({ athlete, onClick, large = false }) => {
-  const supplementsCompleted = athlete.supplements.filter(s => s.completed).length;
-  const supplementsRequired = athlete.supplements.filter(s => s.required).length;
+  const supplementsCompleted = (athlete as any).supplementsCompleted !== undefined 
+    ? (athlete as any).supplementsCompleted 
+    : athlete.supplements.filter(s => s.completed).length;
+    
+  const supplementsRequired = (athlete as any).supplementsRequired !== undefined 
+    ? (athlete as any).supplementsRequired 
+    : athlete.supplements.filter(s => s.required).length;
 
   const statusMeta = {
     green: {
