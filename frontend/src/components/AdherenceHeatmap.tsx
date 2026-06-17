@@ -49,10 +49,10 @@ const HeatmapTooltip: React.FC<{ tip: TooltipState }> = ({ tip }) => {
     <div
       ref={ref}
       style={{ position: "fixed", left: pos.left, top: pos.top, zIndex: 9999, pointerEvents: "none" }}
-      className="px-3 py-2 bg-[hsl(var(--card))] border border-white/10 rounded-xl shadow-2xl whitespace-nowrap"
+      className="px-3 py-2 bg-[hsl(var(--card))] border border-[hsl(var(--card-border))] rounded-xl shadow-2xl whitespace-nowrap"
     >
-      <p className="text-[10px] font-extrabold text-white/60 uppercase tracking-wider">{tip.date}</p>
-      <p className="text-xs font-black text-white mt-0.5">
+      <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">{tip.date}</p>
+      <p className="text-xs font-black text-foreground mt-0.5">
         Score:{" "}
         <span
           className={

@@ -149,7 +149,7 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h4 className="text-sm font-extrabold uppercase tracking-wider text-white">{title}</h4>
+          <h4 className="text-sm font-extrabold uppercase tracking-wider text-foreground">{title}</h4>
           <span className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase mt-0.5 block">{metric}</span>
         </div>
         {target !== undefined && (
@@ -183,7 +183,7 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
                 y1={l.y}
                 x2={w - PADDING.right}
                 y2={l.y}
-                stroke="rgba(255,255,255,0.04)"
+                stroke="hsl(var(--card-border))"
                 strokeDasharray="3 4"
               />
               <text
@@ -191,7 +191,7 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
                 y={l.y}
                 textAnchor="end"
                 dominantBaseline="middle"
-                fill="rgba(255,255,255,0.3)"
+                fill="hsl(var(--muted-foreground))"
                 fontSize={9}
                 fontWeight="bold"
               >
@@ -243,17 +243,17 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
           )}
 
           {/* Axes */}
-          <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={h - PADDING.bottom} stroke="rgba(255,255,255,0.06)" />
-          <line x1={PADDING.left} y1={h - PADDING.bottom} x2={w - PADDING.right} y2={h - PADDING.bottom} stroke="rgba(255,255,255,0.06)" />
+          <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={h - PADDING.bottom} stroke="hsl(var(--card-border))" />
+          <line x1={PADDING.left} y1={h - PADDING.bottom} x2={w - PADDING.right} y2={h - PADDING.bottom} stroke="hsl(var(--card-border))" />
 
           {/* X labels (first and last) */}
           {chartData.length > 0 && (
             <>
-              <text x={PADDING.left} y={h - PADDING.bottom + 14} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize={8} fontWeight="bold">
+              <text x={PADDING.left} y={h - PADDING.bottom + 14} textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize={8} fontWeight="bold">
                 {chartData[0].date}
               </text>
               {chartData.length > 1 && (
-                <text x={w - PADDING.right} y={h - PADDING.bottom + 14} textAnchor="end" fill="rgba(255,255,255,0.3)" fontSize={8} fontWeight="bold">
+                <text x={w - PADDING.right} y={h - PADDING.bottom + 14} textAnchor="end" fill="hsl(var(--muted-foreground))" fontSize={8} fontWeight="bold">
                   {chartData[chartData.length - 1].date}
                 </text>
               )}
@@ -269,7 +269,7 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
                 y1={PADDING.top}
                 x2={tooltip.x}
                 y2={h - PADDING.bottom}
-                stroke="rgba(255,255,255,0.1)"
+                stroke="hsl(var(--card-border))"
                 strokeDasharray="3 3"
               />
               {/* Glow dot */}
@@ -277,11 +277,11 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
               <circle cx={tooltip.x} cy={tooltip.y} r={4.5} fill="hsl(var(--background))" stroke={strokeColor} strokeWidth={2.5} />
 
               {/* Tooltip box */}
-              <rect x={tipX} y={tipY} width={tipBoxW} height={tipBoxH} rx={6} fill="hsl(var(--card))" stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
-              <text x={tipX + tipBoxW / 2} y={tipY + 13} textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize={8} fontWeight="bold">
+              <rect x={tipX} y={tipY} width={tipBoxW} height={tipBoxH} rx={6} fill="hsl(var(--card))" stroke="hsl(var(--card-border))" strokeWidth={1} />
+              <text x={tipX + tipBoxW / 2} y={tipY + 13} textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize={8} fontWeight="bold">
                 {tooltip.date}
               </text>
-              <text x={tipX + tipBoxW / 2} y={tipY + 27} textAnchor="middle" fill="white" fontSize={11} fontWeight="bold">
+              <text x={tipX + tipBoxW / 2} y={tipY + 27} textAnchor="middle" fill="hsl(var(--foreground))" fontSize={11} fontWeight="bold">
                 {tooltip.value}
               </text>
             </>

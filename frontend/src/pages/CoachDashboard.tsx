@@ -140,7 +140,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Coaching Workspace</p>
-              <h1 className="text-lg font-black text-white">Coach {name || 'Dashboard'}</h1>
+              <h1 className="text-lg font-black text-foreground">Coach {name || 'Dashboard'}</h1>
             </div>
           </div>
 
@@ -169,7 +169,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
           <div className="glass-panel rounded-3xl p-6 md:p-8 max-w-md w-full relative shadow-2xl animate-fade-in border-white/10">
             <div className="absolute top-0 inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-primary to-purple-600" />
             
-            <h2 className="text-2xl font-black text-white mb-2">Provision Athlete</h2>
+            <h2 className="text-2xl font-black text-foreground mb-2">Provision Athlete</h2>
             <p className="text-xs text-muted-foreground leading-relaxed mb-6">Create credentials for a new athlete workspace. This athlete will be bound to your roster and subject to PostgreSQL isolated query checks.</p>
 
             {provisionSuccess ? (
@@ -185,7 +185,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
                     type="text"
                     value={provName}
                     onChange={(e) => setProvName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                     placeholder="Enter athlete's name"
                   />
                 </div>
@@ -196,7 +196,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
                     type="email"
                     value={provEmail}
                     onChange={(e) => setProvEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                     placeholder="athlete@example.com"
                   />
                 </div>
@@ -207,7 +207,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
                     type="password"
                     value={provPassword}
                     onChange={(e) => setProvPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                     placeholder="Set athlete initial password"
                   />
                 </div>
@@ -250,7 +250,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
               <span className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Active Roster Size</span>
               <Users className="w-5 h-5 text-primary" />
             </div>
-            <p className="text-3xl font-black text-white">{athletes.length}</p>
+            <p className="text-3xl font-black text-foreground">{athletes.length}</p>
           </div>
 
           <div className="glass-panel p-6 rounded-3xl bg-gradient-to-br from-status-green/5 to-transparent flex flex-col justify-between min-h-[110px]">
@@ -258,7 +258,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
               <span className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Team Avg Score</span>
               <Activity className="w-5 h-5 text-status-green" />
             </div>
-            <p className="text-3xl font-black text-white">{avgScore}</p>
+            <p className="text-3xl font-black text-foreground">{avgScore}</p>
           </div>
 
           <div className="glass-panel p-6 rounded-3xl bg-gradient-to-br from-status-orange/5 to-transparent flex flex-col justify-between min-h-[110px]">
@@ -267,7 +267,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
               <TrendingUp className="w-5 h-5 text-status-orange" />
             </div>
             <div>
-              <p className="text-3xl font-black text-white">{bestStreakAthlete?.streak || 0}</p>
+              <p className="text-3xl font-black text-foreground">{bestStreakAthlete?.streak || 0}</p>
               {bestStreakAthlete && (
                 <p className="text-[9px] text-muted-foreground font-bold uppercase mt-1">Athlete: {bestStreakAthlete.name}</p>
               )}
@@ -288,7 +288,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
         {/* Athletes Bento Grid */}
         <section className="space-y-6">
           <div className="flex items-center justify-between border-b border-card-border/50 pb-4">
-            <h2 className="text-xl font-black text-white tracking-tight">Athlete Progress Trackers</h2>
+            <h2 className="text-xl font-black text-foreground tracking-tight">Athlete Progress Trackers</h2>
             <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Flagged Profiles Promoted</span>
           </div>
           
@@ -321,7 +321,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
         {athletes.length > 0 && (
           <section className="space-y-6">
             <div className="border-b border-card-border/50 pb-4">
-              <h2 className="text-xl font-black text-white tracking-tight">Team-wide Analytics Overview</h2>
+              <h2 className="text-xl font-black text-foreground tracking-tight">Team-wide Analytics Overview</h2>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

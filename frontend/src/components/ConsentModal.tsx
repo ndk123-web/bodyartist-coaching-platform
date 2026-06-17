@@ -34,11 +34,11 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({ isOpen, onAccept, on
           <div className="w-12 h-12 rounded-2xl bg-status-orange/15 flex items-center justify-center border border-status-orange/30 text-status-orange mb-6">
             <Shield className="w-6 h-6 animate-pulse" />
           </div>
-          <h2 className="text-2xl font-black tracking-tight text-white">
+          <h2 className="text-2xl font-black tracking-tight text-foreground">
             Consent & Privacy Audit
           </h2>
           <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-            Welcome, <span className="text-white font-bold">{athleteName || 'Athlete'}</span>. In compliance with <strong>India's DPDP Act 2025</strong>, please review and grant the required consents to establish your telemetry log.
+            Welcome, <span className="text-primary font-bold">{athleteName || 'Athlete'}</span>. In compliance with <strong>India's DPDP Act 2025</strong>, please review and grant the required consents to establish your telemetry log.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({ isOpen, onAccept, on
               className="mt-1 w-5 h-5 rounded border-card-border text-primary focus:ring-primary cursor-pointer accent-primary"
             />
             <label htmlFor="consent-health" className="cursor-pointer leading-relaxed text-muted-foreground">
-              <strong className="block text-white mb-1 font-bold flex items-center gap-1.5">
+              <strong className="block text-foreground mb-1 font-bold flex items-center gap-1.5">
                 <Database className="w-3.5 h-3.5 text-primary" />
                 Health & Performance Telemetry
               </strong>
@@ -80,7 +80,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({ isOpen, onAccept, on
               className="mt-1 w-5 h-5 rounded border-card-border text-primary focus:ring-primary cursor-pointer accent-primary"
             />
             <label htmlFor="consent-api" className="cursor-pointer leading-relaxed text-muted-foreground">
-              <strong className="block text-white mb-1 font-bold flex items-center gap-1.5">
+              <strong className="block text-foreground mb-1 font-bold flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5 text-status-orange" />
                 Third-Party Image Processing
               </strong>

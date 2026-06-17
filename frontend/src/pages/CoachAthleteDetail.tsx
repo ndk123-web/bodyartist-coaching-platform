@@ -244,7 +244,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 text-center">
         <AlertCircle className="w-14 h-14 text-status-red mb-4" />
-        <h2 className="text-xl font-black text-white mb-2">
+        <h2 className="text-xl font-black text-foreground mb-2">
           Workspace Load Error
         </h2>
         <p className="text-sm text-muted-foreground max-w-md mb-6">
@@ -281,7 +281,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">
                 Athletic Analytics Hub
               </p>
-              <h1 className="text-xl font-black text-white">{athlete.name}</h1>
+              <h1 className="text-xl font-black text-foreground">{athlete.name}</h1>
             </div>
           </div>
 
@@ -320,7 +320,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-extrabold">Adherence History Log</p>
-              <h3 className="text-lg font-black text-white flex items-center gap-2 mt-0.5">
+              <h3 className="text-lg font-black text-foreground flex items-center gap-2 mt-0.5">
                 {selectedDate === getTodayStr() ? (
                   <span className="flex items-center gap-1.5">
                     Today <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
@@ -348,7 +348,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                 const dd = String(current.getDate()).padStart(2, "0");
                 setSelectedDate(`${yyyy}-${mm}-${dd}`);
               }}
-              className="px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-white text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center"
+              className="px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-foreground text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center"
             >
               ← Prev Day
             </button>
@@ -363,7 +363,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                     setSelectedDate(e.target.value);
                   }
                 }}
-                className="w-full px-5 py-2.5 bg-card border border-card-border rounded-2xl text-xs text-white font-extrabold focus:outline-none focus:border-primary cursor-pointer hover:border-white/10 select-none appearance-none"
+                className="w-full px-5 py-2.5 bg-card border border-card-border rounded-2xl text-xs text-foreground font-extrabold focus:outline-none focus:border-primary cursor-pointer hover:border-white/10 select-none appearance-none"
               />
             </div>
 
@@ -380,7 +380,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                 setSelectedDate(`${yyyy}-${mm}-${dd}`);
               }}
               disabled={selectedDate === getTodayStr()}
-              className={`px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-white text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center ${
+              className={`px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-foreground text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center ${
                 selectedDate === getTodayStr() ? "opacity-40 cursor-not-allowed border-transparent" : ""
               }`}
             >
@@ -397,7 +397,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               Adherence Score
             </p>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-black text-white">
+              <span className="text-4xl font-black text-foreground">
                 {athlete.score}
               </span>
               <span className="text-xs text-muted-foreground font-bold">
@@ -427,7 +427,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
             </p>
             <div className="flex items-center gap-2 text-status-orange font-black">
               <Flame className="w-8 h-8 fill-status-orange/10" />
-              <span className="text-4xl text-white">{athlete.streak}</span>
+              <span className="text-4xl text-foreground">{athlete.streak}</span>
               <span className="text-xs text-muted-foreground font-bold">
                 days streak
               </span>
@@ -442,7 +442,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
             <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider mb-2">
               Latest Biometrics
             </p>
-            <div className="flex items-baseline gap-2 text-white">
+            <div className="flex items-baseline gap-2 text-foreground">
               <Scale className="w-6 h-6 text-status-orange" />
               <span className="text-4xl font-black">{athlete.weight}</span>
               <span className="text-xs text-muted-foreground font-bold">
@@ -460,7 +460,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
           {/* Target Config Form */}
           <div className="glass-panel p-6 rounded-3xl lg:col-span-1 space-y-5">
             <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
                 Diet Targets Builder
               </h3>
               <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
@@ -478,7 +478,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                   type="number"
                   value={dietMealsTarget}
                   onChange={(e) => setDietMealsTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary"
+                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -491,7 +491,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                   type="number"
                   value={dietWaterTarget}
                   onChange={(e) => setDietWaterTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary"
+                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -504,7 +504,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                   type="number"
                   value={dietStepsTarget}
                   onChange={(e) => setDietStepsTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary"
+                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -517,7 +517,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                   type="number"
                   value={dietCardioTarget}
                   onChange={(e) => setDietCardioTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary"
+                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -528,7 +528,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                 <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                   {macrosList.map((macro, mIdx) => (
                     <div key={mIdx} className="flex items-center justify-between p-2 rounded-xl bg-card border border-card-border">
-                      <span className="text-[11px] truncate text-white font-bold">{macro.name}</span>
+                      <span className="text-[11px] truncate text-foreground font-bold">{macro.name}</span>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-[10px] text-muted-foreground font-semibold">
                           {macro.value} {macro.unit}
@@ -551,19 +551,19 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                     placeholder="Name (e.g. Protein)"
                     value={newMacroName}
                     onChange={(e) => setNewMacroName(e.target.value)}
-                    className="w-1/3 py-2 px-3 rounded-xl bg-card border border-card-border text-xs text-white focus:outline-none"
+                    className="w-1/3 py-2 px-3 rounded-xl bg-card border border-card-border text-xs text-foreground focus:outline-none"
                   />
                   <input
                     type="number"
                     placeholder="Value"
                     value={newMacroValue || ''}
                     onChange={(e) => setNewMacroValue(Number(e.target.value))}
-                    className="w-1/4 py-2 px-2 rounded-xl bg-card border border-card-border text-xs text-white focus:outline-none"
+                    className="w-1/4 py-2 px-2 rounded-xl bg-card border border-card-border text-xs text-foreground focus:outline-none"
                   />
                   <select
                     value={newMacroUnit}
                     onChange={(e) => setNewMacroUnit(e.target.value)}
-                    className="w-1/4 py-2 px-1 rounded-xl bg-card border border-card-border text-xs text-white bg-card focus:outline-none"
+                    className="w-1/4 py-2 px-1 rounded-xl bg-card border border-card-border text-xs text-foreground bg-card focus:outline-none"
                   >
                     <option value="g">g</option>
                     <option value="mg">mg</option>
@@ -619,7 +619,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                     placeholder="Add supplement name"
                     value={newSuppName}
                     onChange={(e) => setNewSuppName(e.target.value)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-card border border-card-border text-xs text-white focus:outline-none"
+                    className="flex-1 py-2 px-3 rounded-xl bg-card border border-card-border text-xs text-foreground focus:outline-none"
                   />
                   <button
                     type="button"
@@ -701,7 +701,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
           {/* Daily Activity Audit (takes 1 column) */}
           <div className="glass-panel p-6 rounded-3xl lg:col-span-1 space-y-6 flex flex-col justify-between">
             <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
                 Daily Compliance Audit
               </h3>
               <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
@@ -713,7 +713,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               {/* Hydration Audit */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-white flex items-center gap-1.5">
+                  <span className="text-foreground flex items-center gap-1.5">
                     <Droplet className="w-4 h-4 text-status-yellow fill-status-yellow/10" />
                     Water Intake
                   </span>
@@ -734,7 +734,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               {/* Steps Audit */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-white flex items-center gap-1.5">
+                  <span className="text-foreground flex items-center gap-1.5">
                     <Activity className="w-4 h-4 text-primary" />
                     Steps Tracked
                   </span>
@@ -755,7 +755,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               {/* Cardio Audit */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-white flex items-center gap-1.5">
+                  <span className="text-foreground flex items-center gap-1.5">
                     <Flame className="w-4 h-4 text-status-orange" />
                     Cardio Duration
                   </span>
@@ -822,7 +822,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
           {/* Meals logs feed timeline (takes 2 columns) */}
           <div className="glass-panel p-6 rounded-3xl lg:col-span-2 space-y-6">
             <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
                 Adherence Meal History Timeline
               </h3>
               <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
@@ -851,7 +851,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-white text-sm truncate">
+                          <h4 className="font-bold text-foreground text-sm truncate">
                             {meal.food}
                           </h4>
                           {meal.isEdited && (
@@ -877,7 +877,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                             F: {meal.macros.f}g
                           </span>
                         </div>
-                        <span className="text-white bg-card border border-card-border px-2 py-0.5 rounded-md text-[10px]">
+                        <span className="text-foreground bg-card border border-card-border px-2 py-0.5 rounded-md text-[10px]">
                           {meal.calories} kcal
                         </span>
                       </div>

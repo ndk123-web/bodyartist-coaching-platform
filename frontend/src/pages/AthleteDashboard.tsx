@@ -558,7 +558,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Athlete Roster Portal</p>
-              <h1 className="text-lg font-black text-white">{name || 'Athlete Log'}</h1>
+              <h1 className="text-lg font-black text-foreground">{name || 'Athlete Log'}</h1>
             </div>
           </div>
           
@@ -610,7 +610,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                 />
               </svg>
               <div className="absolute text-center">
-                <span className="text-4xl font-black text-white">{scoreMetrics.totalScore}</span>
+                <span className="text-4xl font-black text-foreground">{scoreMetrics.totalScore}</span>
                 <span className="block text-[8px] uppercase tracking-widest text-muted-foreground font-extrabold mt-0.5">Score</span>
               </div>
             </div>
@@ -620,7 +620,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
               <span className="text-[10px] uppercase tracking-widest text-primary font-black px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
                 Daily Metric Status
               </span>
-              <h2 className="text-2xl font-black text-white tracking-tight">Your training adherence is {scoreMetrics.totalScore >= 85 ? 'Optimized' : scoreMetrics.totalScore >= 70 ? 'Balanced' : 'Below Target'}.</h2>
+              <h2 className="text-2xl font-black text-foreground tracking-tight">Your training adherence is {scoreMetrics.totalScore >= 85 ? 'Optimized' : scoreMetrics.totalScore >= 70 ? 'Balanced' : 'Below Target'}.</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Adherence is calculated dynamically across your diet meals target ({mealsLogged}/{mealsTarget}), required supplements completion, and workout metrics logging.
               </p>
@@ -633,7 +633,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
             <div className="w-12 h-12 rounded-2xl bg-status-orange/15 border border-status-orange/35 flex items-center justify-center text-status-orange mb-4 shadow-sm">
               <Flame className="w-6 h-6 text-status-orange fill-status-orange/10 animate-pulse" />
             </div>
-            <p className="text-5xl font-black text-white tracking-tighter">{streak}</p>
+            <p className="text-5xl font-black text-foreground tracking-tighter">{streak}</p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-extrabold mt-1.5">Days Adherence Streak</p>
             <span className="text-[9px] text-status-orange font-bold mt-1.5 bg-status-orange/10 px-2 py-0.5 rounded-md border border-status-orange/20">
               Elite Status
@@ -650,7 +650,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Diet & Meals Log</h3>
+                  <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">Diet & Meals Log</h3>
                   <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">Estimates powered by computer vision</p>
                 </div>
                 <span className={`text-xs font-extrabold px-3 py-1.5 rounded-xl border ${
@@ -667,7 +667,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                 {/* Calories */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] uppercase font-bold tracking-wider">
-                    <span className="text-white">Calories</span>
+                    <span className="text-foreground">Calories</span>
                     <span className="text-muted-foreground">{totalMacros.cal} / {targetMacros.cal} kcal</span>
                   </div>
                   <div className="w-full h-1.5 bg-card rounded-full overflow-hidden">
@@ -735,7 +735,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                       )}
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-bold text-sm text-white">{meal.food}</p>
+                          <p className="font-bold text-sm text-foreground">{meal.food}</p>
                           {meal.isEdited && (
                             <span className="text-[8px] bg-primary/10 text-primary border border-primary/20 font-black uppercase px-1 rounded-md">
                               Edited
@@ -752,7 +752,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                         <span className="text-status-yellow">C: {meal.macros.c}g</span>
                         <span className="text-status-orange">F: {meal.macros.f}g</span>
                       </div>
-                      <span className="text-white bg-card border border-card-border px-2.5 py-1 rounded-lg">
+                      <span className="text-foreground bg-card border border-card-border px-2.5 py-1 rounded-lg">
                         {meal.calories} kcal
                       </span>
                     </div>
@@ -777,7 +777,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Hydration Log</h3>
+                  <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">Hydration Log</h3>
                   <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">Coach water target: {waterTarget} glasses</p>
                 </div>
                 <span className={`text-xs font-extrabold px-3 py-1.5 rounded-xl border ${
@@ -839,7 +839,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
           <div className="glass-panel p-6 rounded-3xl lg:col-span-3">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Supplement Checklist</h3>
+                <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">Supplement Checklist</h3>
                 <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">Supplements require explicit tracking for enhanced athlete profiles</p>
               </div>
               <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl border bg-status-green/10 text-status-green border-status-green/30">
@@ -865,7 +865,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                   }`}>
                     {supp.completed && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                   </div>
-                  <span className={`font-bold text-xs ${supp.completed ? 'text-status-green line-through' : 'text-white'}`}>
+                  <span className={`font-bold text-xs ${supp.completed ? 'text-status-green line-through' : 'text-foreground'}`}>
                     {supp.name}
                   </span>
                   {supp.required && (
@@ -895,7 +895,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                   step="0.1"
                   value={weight}
                   onChange={(e) => handleWeightChange(Number(e.target.value))}
-                  className="flex-1 py-3 px-4 rounded-xl bg-card/40 border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                  className="flex-1 py-3 px-4 rounded-xl bg-card/40 border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                 />
               </div>
             </div>
@@ -948,7 +948,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
 
         {/* History Charts Section */}
         <section className="space-y-6">
-          <h2 className="text-xl font-black text-white tracking-tight">Analytics & Adherence Logs</h2>
+          <h2 className="text-xl font-black text-foreground tracking-tight">Analytics & Adherence Logs</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <AdherenceHeatmap scores={heatmapData} startDate={createdAt} />
             <SimpleLineChart
@@ -968,7 +968,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
           <div className="glass-panel rounded-3xl p-6 md:p-8 max-w-lg w-full max-h-[95vh] overflow-y-auto relative shadow-2xl animate-fade-in border-white/10">
             <div className="absolute top-0 inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-status-orange to-yellow-500" />
             
-            <h2 className="text-2xl font-black text-white mb-4">AI Vision Meal Upload</h2>
+            <h2 className="text-2xl font-black text-foreground mb-4">AI Vision Meal Upload</h2>
 
             {!showConfirmPane ? (
               <div className="space-y-5">
@@ -976,7 +976,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                 <div className="relative">
                   <label className="block p-10 rounded-2xl border-2 border-dashed border-card-border hover:border-status-orange/40 cursor-pointer transition-colors text-center bg-card/20 relative overflow-hidden">
                     <Camera className="w-10 h-10 text-muted-foreground/60 mx-auto mb-3" />
-                    <p className="text-sm text-white font-bold">Select Meal Image</p>
+                    <p className="text-sm text-foreground font-bold">Select Meal Image</p>
                     <p className="text-xs text-muted-foreground mt-1">Image processing estimates macros and micronutrients</p>
                     <input
                       type="file"
@@ -1020,7 +1020,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                     <span className="text-[9px] bg-status-green/10 text-status-green border border-status-green/20 px-2 py-0.5 rounded-md font-black uppercase tracking-wider">
                       LogMeal Estimate
                     </span>
-                    <h4 className="text-sm font-bold text-white mt-1.5">{mealFormData.food}</h4>
+                    <h4 className="text-sm font-bold text-foreground mt-1.5">{mealFormData.food}</h4>
                     <p className="text-[10px] text-muted-foreground font-medium">Confidence Score: {mealFormData.confidence}%</p>
                   </div>
                 </div>
@@ -1032,7 +1032,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                     type="text"
                     value={mealFormData.food}
                     onChange={(e) => setMealFormData({ ...mealFormData, food: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                     placeholder="e.g. Chicken Rice"
                     required
                   />
@@ -1040,7 +1040,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
 
                 {/* NUDGE ADJUSTMENT CONTROLS */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-extrabold uppercase tracking-widest text-white border-b border-card-border/60 pb-2">
+                  <h3 className="text-xs font-extrabold uppercase tracking-widest text-foreground border-b border-card-border/60 pb-2">
                     Nudge Macronutrients
                   </h3>
                   
@@ -1059,7 +1059,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                             calories: Math.round(p * 4 + mealFormData.macros.c * 4 + mealFormData.macros.f * 9)
                           });
                         }}
-                        className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                        className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                       />
                     </div>
                     {/* Carbs */}
@@ -1076,7 +1076,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                             calories: Math.round(mealFormData.macros.p * 4 + c * 4 + mealFormData.macros.f * 9)
                           });
                         }}
-                        className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                        className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                       />
                     </div>
                     {/* Fat */}
@@ -1093,7 +1093,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                             calories: Math.round(mealFormData.macros.p * 4 + mealFormData.macros.c * 4 + f * 9)
                           });
                         }}
-                        className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-white font-bold text-sm focus:outline-none"
+                        className="w-full px-3 py-2.5 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
                       />
                     </div>
                   </div>
@@ -1102,7 +1102,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                 {/* Micronutrients display */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center border-b border-card-border/60 pb-2">
-                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-white">
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-foreground">
                       Directional Micronutrients
                     </h3>
                     <span className="text-[8px] bg-card border border-card-border text-muted-foreground uppercase font-black px-1.5 py-0.5 rounded">
@@ -1112,22 +1112,22 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                   
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-[10px] text-muted-foreground font-bold">
                     <div className="p-2.5 rounded-xl bg-card/20 border border-card-border/40">
-                      <span>Fiber: </span><span className="text-white font-black">{mealFormData.micronutrients.fiber}g</span>
+                      <span>Fiber: </span><span className="text-foreground font-black">{mealFormData.micronutrients.fiber}g</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-card/20 border border-card-border/40">
-                      <span>Iron: </span><span className="text-white font-black">{mealFormData.micronutrients.iron}mg</span>
+                      <span>Iron: </span><span className="text-foreground font-black">{mealFormData.micronutrients.iron}mg</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-card/20 border border-card-border/40">
-                      <span>Calcium: </span><span className="text-white font-black">{mealFormData.micronutrients.calcium}mg</span>
+                      <span>Calcium: </span><span className="text-foreground font-black">{mealFormData.micronutrients.calcium}mg</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-card/20 border border-card-border/40">
-                      <span>Potassium: </span><span className="text-white font-black">{mealFormData.micronutrients.potassium}mg</span>
+                      <span>Potassium: </span><span className="text-foreground font-black">{mealFormData.micronutrients.potassium}mg</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-card/20 border border-card-border/40">
-                      <span>Magnesium: </span><span className="text-white font-black">{mealFormData.micronutrients.magnesium}mg</span>
+                      <span>Magnesium: </span><span className="text-foreground font-black">{mealFormData.micronutrients.magnesium}mg</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-card/20 border border-card-border/40">
-                      <span>Vit B12: </span><span className="text-white font-black">{mealFormData.micronutrients.vitaminB12}mcg</span>
+                      <span>Vit B12: </span><span className="text-foreground font-black">{mealFormData.micronutrients.vitaminB12}mcg</span>
                     </div>
                   </div>
                 </div>
@@ -1137,7 +1137,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                   <span className="text-muted-foreground uppercase tracking-wide text-[9px] font-extrabold block">Daily Budget Comparison</span>
                   <div className="flex justify-between">
                     <span>Eaten Today + Meal:</span>
-                    <span className={totalMacros.cal + mealFormData.calories > targetMacros.cal ? 'text-status-red' : 'text-white'}>
+                    <span className={totalMacros.cal + mealFormData.calories > targetMacros.cal ? 'text-status-red' : 'text-foreground'}>
                       {totalMacros.cal + mealFormData.calories} / {targetMacros.cal} kcal
                     </span>
                   </div>
@@ -1153,7 +1153,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                   <button
                     type="button"
                     onClick={() => { setShowConfirmPane(false); setTempImage(null); }}
-                    className="flex-1 py-4 rounded-2xl border border-card-border text-foreground hover:text-white font-bold transition-all cursor-pointer text-xs"
+                    className="flex-1 py-4 rounded-2xl border border-card-border text-foreground hover:text-foreground font-bold transition-all cursor-pointer text-xs"
                   >
                     Nudge Back
                   </button>

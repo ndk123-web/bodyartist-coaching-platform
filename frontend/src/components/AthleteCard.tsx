@@ -68,7 +68,7 @@ export const AthleteCard: React.FC<AthleteCardProps> = ({ athlete, onClick, larg
       <div>
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0 pr-2">
-            <h3 className="text-xl font-black text-white group-hover:text-primary transition-colors truncate tracking-tight">
+            <h3 className="text-xl font-black text-foreground group-hover:text-primary transition-colors truncate tracking-tight">
               {athlete.name}
             </h3>
             <p className="text-xs text-muted-foreground truncate font-medium">{athlete.email}</p>
@@ -83,7 +83,7 @@ export const AthleteCard: React.FC<AthleteCardProps> = ({ athlete, onClick, larg
         <div className="grid grid-cols-2 gap-3 mb-5">
           <div className="glass-panel p-3 rounded-2xl bg-card/25 border-white/[0.03]">
             <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Performance</p>
-            <p className="text-2xl font-black text-white flex items-baseline gap-0.5">
+            <p className="text-2xl font-black text-foreground flex items-baseline gap-0.5">
               {athlete.score}<span className="text-[10px] text-muted-foreground font-normal">/100</span>
             </p>
           </div>
@@ -105,7 +105,7 @@ export const AthleteCard: React.FC<AthleteCardProps> = ({ athlete, onClick, larg
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
                 <span>Meal Progress</span>
-                <span className="text-white">{athlete.mealsLogged}/{athlete.mealsTarget}</span>
+                <span className="text-foreground">{athlete.mealsLogged}/{athlete.mealsTarget}</span>
               </div>
               <div className="h-1.5 rounded-full bg-card/60 overflow-hidden">
                 <div 
@@ -119,7 +119,7 @@ export const AthleteCard: React.FC<AthleteCardProps> = ({ athlete, onClick, larg
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
                 <span>Hydration</span>
-                <span className="text-white">{athlete.waterLog}/{athlete.waterTarget} gls</span>
+                <span className="text-foreground">{athlete.waterLog}/{athlete.waterTarget} gls</span>
               </div>
               <div className="h-1.5 rounded-full bg-card/60 overflow-hidden">
                 <div 
@@ -133,7 +133,7 @@ export const AthleteCard: React.FC<AthleteCardProps> = ({ athlete, onClick, larg
             <div className="space-y-1 col-span-2">
               <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
                 <span>Required Supplements</span>
-                <span className="text-white">{supplementsCompleted}/{supplementsRequired} checked</span>
+                <span className="text-foreground">{supplementsCompleted}/{supplementsRequired} checked</span>
               </div>
               <div className="h-1.5 rounded-full bg-card/60 overflow-hidden">
                 <div 
@@ -147,15 +147,15 @@ export const AthleteCard: React.FC<AthleteCardProps> = ({ athlete, onClick, larg
           <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
               <span className="flex items-center gap-1.5"><Dumbbell className="w-3.5 h-3.5 text-primary" /> Meals Logged</span>
-              <span className="text-white font-bold">{athlete.mealsLogged}/{athlete.mealsTarget}</span>
+              <span className="text-foreground font-bold">{athlete.mealsLogged}/{athlete.mealsTarget}</span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
               <span className="flex items-center gap-1.5"><Droplet className="w-3.5 h-3.5 text-status-yellow" /> Hydration</span>
-              <span className="text-white font-bold">{athlete.waterLog}/{athlete.waterTarget} glasses</span>
+              <span className="text-foreground font-bold">{athlete.waterLog}/{athlete.waterTarget} glasses</span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
               <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-status-green" /> Supplements</span>
-              <span className="text-white font-bold">{supplementsCompleted}/{supplementsRequired}</span>
+              <span className="text-foreground font-bold">{supplementsCompleted}/{supplementsRequired}</span>
             </div>
           </div>
         )}
