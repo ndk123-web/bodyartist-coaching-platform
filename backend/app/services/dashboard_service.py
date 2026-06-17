@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from datetime import date, timedelta
 from fastapi import HTTPException
+from typing import List
 
 from backend.app.repositories.daily_log_repository import DailyLogRepository
 from backend.app.repositories.diet_plan_repository import DietPlanRepository
@@ -59,7 +60,9 @@ class DashboardService:
             current_streak=current_streak,
         )
 
-    def get_coach_athlete_detail(self, athlete_id: UUID, log_date: date = None) -> AthleteDetailResponse:
+    def get_coach_athlete_detail(
+        self, athlete_id: UUID, log_date: date = None
+    ) -> AthleteDetailResponse:
         from backend.app.repositories.user_repository import UserRepository
         from backend.app.models.meal_log_model import MealLog
         from sqlalchemy import cast, Date
@@ -82,7 +85,10 @@ class DashboardService:
             supplement_checklist = diet_plan.supplement_checklist or []
             db_macros = diet_plan.target_macros
             if isinstance(db_macros, dict):
-                target_macros = [{"name": k.capitalize(), "value": v, "unit": "g"} for k, v in db_macros.items()]
+                target_macros = [
+                    {"name": k.capitalize(), "value": v, "unit": "g"}
+                    for k, v in db_macros.items()
+                ]
             elif isinstance(db_macros, list):
                 target_macros = db_macros
             else:
@@ -100,7 +106,7 @@ class DashboardService:
             target_macros = [
                 {"name": "Protein", "value": 200, "unit": "g"},
                 {"name": "Carbs", "value": 250, "unit": "g"},
-                {"name": "Fat", "value": 75, "unit": "g"}
+                {"name": "Fat", "value": 75, "unit": "g"},
             ]
 
         # 3. Fetch today's daily log
@@ -270,15 +276,14 @@ class DashboardService:
                 ChartPoint(date=today.strftime("%m-%d"), value=water_logged)
             ]
 
-        # 10. Get heatmap compliance for the last 30 calendar days
-        heatmap_data = []
-        for i in range(29, -1, -1):
-            check_date = current_today - timedelta(days=i)
-            found_log = next((l for l in past_logs if l.log_date == check_date), None)
-            score_val = found_log.score if found_log else 0
-            heatmap_data.append(
-                HeatmapPoint(date=check_date.strftime("%Y-%m-%d"), score=score_val)
-            )
+        # 10. Get heatmap compliance from all athlete daily logs
+        all_logs = (
+            self.db.query(DailyLog).filter(DailyLog.athlete_id == athlete_id).all()
+        )
+        heatmap_data = [
+            HeatmapPoint(date=log.log_date.strftime("%Y-%m-%d"), score=log.score or 0)
+            for log in all_logs
+        ]
 
         return AthleteDetailResponse(
             id=athlete_id,
@@ -299,9 +304,59 @@ class DashboardService:
             heatmapData=heatmap_data,
             stepsLogged=steps_logged,
             cardioLogged=cardio_logged,
+            created_at=athlete.created_at,
             dietMealsTarget=meals_target,
             dietWaterTarget=water_target,
             dietStepsTarget=steps_target,
             dietCardioTarget=cardio_target,
             dietTargetMacros=target_macros,
         )
+
+    def get_daily_log(self, athlete_id: UUID, log_date: date = None) -> DailyLog:
+        if log_date is None:
+            log_date = date.today()
+
+        daily_log = self.daily_log_repo.get_log_by_date(self.db, athlete_id, log_date)
+        if not daily_log:
+            daily_log = DailyLog(
+                athlete_id=athlete_id,
+                log_date=log_date,
+                water_logged=0,
+                steps_logged=0,
+                cardio_logged=0,
+                weight=None,
+                score=0,
+                status="pending",
+                supplement_checkoffs=[],
+            )
+        return daily_log
+
+    def get_athlete_heatmap(self, athlete_id: UUID) -> List[HeatmapPoint]:
+        logs = self.db.query(DailyLog).filter(DailyLog.athlete_id == athlete_id).all()
+        return [
+            HeatmapPoint(date=log.log_date.strftime("%Y-%m-%d"), score=log.score or 0)
+            for log in logs
+        ]
+
+    def get_weight_history(self, athlete_id: UUID) -> List[ChartPoint]:
+        past_logs = (
+            self.db.query(DailyLog)
+            .filter(DailyLog.athlete_id == athlete_id)
+            .order_by(DailyLog.log_date.desc())
+            .limit(15)
+            .all()
+        )
+
+        past_logs_sorted = sorted(past_logs, key=lambda l: l.log_date)
+        weight_history = []
+        weights_found = 0
+        for log in reversed(past_logs_sorted):
+            if log.weight is not None and weights_found < 7:
+                weight_history.append(
+                    ChartPoint(
+                        date=log.log_date.strftime("%m-%d"), value=float(log.weight)
+                    )
+                )
+                weights_found += 1
+        weight_history.reverse()
+        return weight_history

@@ -41,52 +41,9 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
   const [provisionError, setProvisionError] = useState('');
   const [provisionSuccess, setProvisionSuccess] = useState(false);
 
-  // Sync state with incoming props, but load client-side updates from localStorage
+  // Sync state with incoming props
   useEffect(() => {
-    const updated = initialAthletes.map(athlete => {
-      const saved = localStorage.getItem(`athlete-data-${athlete.email}`);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          
-          // Re-calculate daily score for display based on updated localStorage
-          const mealsLogged = parsed.meals ? parsed.meals.length : athlete.mealsLogged;
-          const waterLogged = typeof parsed.waterLogged === 'number' ? parsed.waterLogged : athlete.waterLog;
-          const stepsLogged = typeof parsed.stepsLogged === 'number' ? parsed.stepsLogged : 6000;
-          const cardioLogged = typeof parsed.cardioLogged === 'number' ? parsed.cardioLogged : 15;
-          const currentSupps = Array.isArray(parsed.supplements) ? parsed.supplements : athlete.supplements;
-          
-          const mealScore = Math.min(100, (mealsLogged / athlete.mealsTarget) * 100);
-          const requiredSupps = currentSupps.filter((s: any) => s.required);
-          const completedRequiredSupps = requiredSupps.filter((s: any) => s.completed).length;
-          const suppScore = requiredSupps.length > 0 ? (completedRequiredSupps / requiredSupps.length) * 100 : 100;
-          const waterScore = waterLogged >= athlete.waterTarget ? 100 : 0;
-          const workoutScore = (Math.min(100, (stepsLogged / 10000) * 100) + Math.min(100, (cardioLogged / 30) * 100)) / 2;
-          
-          const totalScore = Math.round((mealScore * 0.50) + (suppScore * 0.20) + (waterScore * 0.15) + (workoutScore * 0.15));
-          
-          let status: 'green' | 'yellow' | 'orange' | 'red' = 'red';
-          if (totalScore >= 85) status = 'green';
-          else if (totalScore >= 70) status = 'yellow';
-          else if (totalScore >= 50) status = 'orange';
-
-          return {
-            ...athlete,
-            score: totalScore,
-            status,
-            weight: typeof parsed.weight === 'number' ? parsed.weight : athlete.weight,
-            waterLog: waterLogged,
-            mealsLogged: mealsLogged,
-            supplements: currentSupps,
-            mealHistory: parsed.meals || athlete.mealHistory || []
-          };
-        } catch (err) {
-          console.error(err);
-        }
-      }
-      return athlete;
-    });
-    setAthletes(updated);
+    setAthletes(initialAthletes);
   }, [initialAthletes]);
 
   const handleLogout = () => {

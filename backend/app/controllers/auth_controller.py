@@ -166,28 +166,36 @@ class AuthController:
         
         athletes = UserRepository.get_athletes_by_coach(db, coach_uuid)
         
-        # Format output to match frontend expectations
+        from backend.app.services.dashboard_service import DashboardService
+        service = DashboardService(db)
+        
         result = []
         for athlete in athletes:
-            result.append({
-                "id": str(athlete.id),
-                "name": athlete.name,
-                "email": athlete.email,
-                "score": 0,
-                "streak": 0,
-                "weight": 80.0,  # default / placeholder
-                "waterLog": 0,
-                "waterTarget": 8,
-                "mealsLogged": 0,
-                "mealsTarget": 5,
-                "status": "red",
-                "supplements": [
-                    { "name": "Creatine Monohydrate", "completed": False, "required": True },
-                    { "name": "Omega 3 Fish Oil", "completed": False, "required": True },
-                    { "name": "Multivitamin Formula", "completed": False, "required": True }
-                ],
-                "mealHistory": []
-            })
+            try:
+                # Fetch actual live today metrics from the dashboard service
+                detail = service.get_coach_athlete_detail(athlete.id)
+                result.append(detail.model_dump(mode="json"))
+            except Exception as e:
+                # Safe fallback if database fetch fails for a specific athlete
+                result.append({
+                    "id": str(athlete.id),
+                    "name": athlete.name,
+                    "email": athlete.email,
+                    "score": 0,
+                    "streak": 0,
+                    "weight": 80.0,
+                    "waterLog": 0,
+                    "waterTarget": 8,
+                    "mealsLogged": 0,
+                    "mealsTarget": 5,
+                    "status": "red",
+                    "supplements": [
+                        { "name": "Creatine Monohydrate", "completed": False, "required": True },
+                        { "name": "Omega 3 Fish Oil", "completed": False, "required": True },
+                        { "name": "Multivitamin Formula", "completed": False, "required": True }
+                    ],
+                    "mealHistory": []
+                })
         return result
 
     @staticmethod

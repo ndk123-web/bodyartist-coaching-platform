@@ -1,5 +1,6 @@
 from pydantic import BaseModel, UUID4, Field
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
+from datetime import datetime
 
 class TargetMacros(BaseModel):
     protein: float
@@ -16,6 +17,7 @@ class AthleteTargetResponse(BaseModel):
     tolerance_percent: int
     target_macros: List[Dict[str, Any]]
     supplement_checklist: List[Dict[str, Any]]
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

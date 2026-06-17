@@ -1,5 +1,6 @@
 from pydantic import BaseModel, UUID4
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 
 
 class DashboardSummaryResponse(BaseModel):
@@ -56,6 +57,7 @@ class AthleteDetailResponse(BaseModel):
     heatmapData: List[HeatmapPoint]
     stepsLogged: int
     cardioLogged: int
+    created_at: datetime
 
     # Target configurations
     dietMealsTarget: int

@@ -7,8 +7,13 @@ class WaterLogRequest(BaseModel):
     log_date: date
     water_logged: int = Field(..., gt=0, description="Water logged must be greater than 0")
 
+class WeightLogRequest(BaseModel):
+    athlete_id: UUID4
+    log_date: date
+    weight: float = Field(..., gt=0.0, description="Weight logged must be greater than 0.0")
+
 class DailyLogResponse(BaseModel):
-    id: UUID4
+    id: Optional[UUID4] = None
     athlete_id: UUID4
     log_date: date
     water_logged: int

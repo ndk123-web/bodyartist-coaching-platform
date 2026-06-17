@@ -43,6 +43,15 @@ class MealRepository:
         db.add(db_meal)
         db.commit()
         db.refresh(db_meal)
+
+        # Trigger dynamic score calculation in daily log
+        try:
+            from backend.app.repositories.daily_log_repository import DailyLogRepository
+            daily_log_repo = DailyLogRepository()
+            daily_log_repo.recalculate_and_save_score(db, athlete_id, db_meal.logged_at.date())
+        except Exception as e:
+            print(f"[MEAL REPO] Warning: Failed to recalculate score: {e}")
+
         return db_meal
 
     @staticmethod

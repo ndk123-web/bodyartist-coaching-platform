@@ -11,11 +11,16 @@ class AthleteTargetService:
         self.repository = DietPlanRepository()
 
     def get_athlete_targets(self, athlete_id: UUID) -> AthleteTargetResponse:
+        from backend.app.repositories.user_repository import UserRepository
+        athlete = UserRepository.get_by_id(self.db, athlete_id)
+        created_at = athlete.created_at if athlete else None
+
         diet_plan = self.repository.get_by_athlete_id(self.db, athlete_id)
         
         if not diet_plan:
             data = {
                 "athlete_id": athlete_id,
+                "created_at": created_at,
                 "meals_target": 5,
                 "water_target": 8,
                 "steps_target": 10000,
@@ -45,6 +50,7 @@ class AthleteTargetService:
             
         data = {
             "athlete_id": diet_plan.athlete_id,
+            "created_at": created_at,
             "meals_target": diet_plan.meals_target,
             "water_target": diet_plan.water_target,
             "steps_target": diet_plan.steps_target,

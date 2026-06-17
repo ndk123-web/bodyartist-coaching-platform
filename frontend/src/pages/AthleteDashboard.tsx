@@ -42,20 +42,11 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
 
   const [targetMacros, setTargetMacros] = useState({ p: 200, c: 250, f: 75, cal: 2475 });
 
-
-  const [meals, setMeals] = useState([
-    { id: '1', time: '08:30', food: 'Oatmeal with Protein & Berries', macros: { p: 32, f: 6, c: 45 }, calories: 362, photo: null as string | null, confidence: 91, isEdited: false },
-    { id: '2', time: '14:15', food: 'Grilled Chicken Breast & Rice', macros: { p: 48, f: 8, c: 52 }, calories: 472, photo: null as string | null, confidence: 85, isEdited: false },
-  ]);
-
-  const [weightHistory, setWeightHistory] = useState([
-    { date: '06-05', value: 83.1 },
-    { date: '06-06', value: 82.9 },
-    { date: '06-07', value: 83.0 },
-    { date: '06-08', value: 82.6 },
-    { date: '06-09', value: 82.5 },
-    { date: '06-10', value: 82.4 },
-  ]);
+  const [meals, setMeals] = useState<any[]>([]);
+  const [weightHistory, setWeightHistory] = useState<{ date: string; value: number }[]>([]);
+  const [heatmapData, setHeatmapData] = useState<{ date: string; score: number }[]>([]);
+  const [createdAt, setCreatedAt] = useState<string | undefined>(undefined);
+  const [streak, setStreak] = useState<number>(0);
 
   // Load from localStorage if present
   useEffect(() => {
@@ -76,9 +67,55 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
     }
   }, [storageKey]);
 
+  const loadAdherenceData = () => {
+    if (!id) return;
+
+    fetch(`http://localhost:8000/api/v1/athlete/heatmap/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Heatmap data not found');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          setHeatmapData(data);
+        }
+      })
+      .catch(err => console.warn('Could not fetch heatmap data from server:', err));
+
+    fetch(`http://localhost:8000/api/v1/athlete/weight-history/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Weight history not found');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          const mapped = data.map((d: any) => ({
+            date: d.date,
+            value: d.value
+          }));
+          setWeightHistory(mapped);
+        }
+      })
+      .catch(err => console.warn('Could not fetch weight history from server:', err));
+
+    fetch(`http://localhost:8000/api/v1/athlete/dashboard-summary/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Dashboard summary not found');
+        return res.json();
+      })
+      .then(data => {
+        if (data && typeof data.current_streak === 'number') {
+          setStreak(data.current_streak);
+        }
+      })
+      .catch(err => console.warn('Could not fetch dashboard summary from server:', err));
+  };
+
   // Load from database if athlete is authenticated
   useEffect(() => {
     if (!id) return;
+
+    loadAdherenceData();
 
     // 1. Fetch Diet Plan Targets
     fetch(`http://localhost:8000/api/v1/athlete/targets/${id}`)
@@ -92,6 +129,9 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
           setWaterTarget(data.water_target || 8);
           setStepsTarget(data.steps_target || 10000);
           setCardioTarget(data.cardio_target || 30);
+          if (data.created_at) {
+            setCreatedAt(data.created_at.split("T")[0]);
+          }
           
           if (Array.isArray(data.target_macros)) {
             let p = 0, c = 0, f = 0;
@@ -152,6 +192,36 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
       })
       .catch(err => console.warn('Could not fetch meal logs from server:', err));
 
+    // 3. Fetch today's daily log from the database
+    fetch(`http://localhost:8000/api/v1/athlete/daily-log/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Daily log not found');
+        return res.json();
+      })
+      .then(data => {
+        if (data) {
+          if (typeof data.water_logged === 'number') setWaterLogged(data.water_logged);
+          if (typeof data.steps_logged === 'number') setStepsLogged(data.steps_logged);
+          if (typeof data.cardio_logged === 'number') setCardioLogged(data.cardio_logged);
+          if (typeof data.weight === 'number' && data.weight > 0) setWeight(data.weight);
+          
+          if (Array.isArray(data.supplement_checkoffs)) {
+            const completedNames = new Set(
+              data.supplement_checkoffs
+                .filter((s: any) => s.completed)
+                .map((s: any) => s.name?.toLowerCase())
+            );
+            setSupplements(prevSupps => 
+              prevSupps.map(s => ({
+                ...s,
+                completed: completedNames.has(s.name?.toLowerCase())
+              }))
+            );
+          }
+        }
+      })
+      .catch(err => console.warn('Could not fetch daily log from server:', err));
+
   }, [id]);
 
   // Save to localStorage helper
@@ -166,6 +236,54 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
       weightHistory
     };
     localStorage.setItem(storageKey, JSON.stringify({ ...current, ...updates }));
+  };
+
+  // Sync to backend DB helper
+  const syncTelemetry = (type: string, value: any) => {
+    if (!id) return;
+    const log_date = new Date().toISOString().split("T")[0];
+    
+    let url = "";
+    let body: any = {};
+    
+    switch (type) {
+      case "water":
+        url = "http://localhost:8000/api/v1/logs/water";
+        body = { athlete_id: id, log_date, water_logged: value };
+        break;
+      case "steps":
+        url = "http://localhost:8000/api/v1/logs/steps";
+        body = { athlete_id: id, log_date, steps_logged: value };
+        break;
+      case "cardio":
+        url = "http://localhost:8000/api/v1/logs/cardio";
+        body = { athlete_id: id, log_date, cardio_logged: value };
+        break;
+      case "supplements":
+        url = "http://localhost:8000/api/v1/logs/supplements";
+        body = { athlete_id: id, log_date, checked_supplements: value };
+        break;
+      case "weight":
+        url = "http://localhost:8000/api/v1/logs/weight";
+        body = { athlete_id: id, log_date, weight: value };
+        break;
+      default:
+        return;
+    }
+    
+    fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+    .then(async (res) => {
+      if (!res.ok) {
+        console.warn(`[TELEMETRY SYNC] Failed to sync ${type} to backend`);
+      } else {
+        loadAdherenceData();
+      }
+    })
+    .catch(err => console.error(`[TELEMETRY SYNC] Error syncing ${type}:`, err));
   };
 
   // Dynamic Score Calculation
@@ -237,24 +355,29 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
     rawVisionResponse: {} as any
   });
 
-  const toggleSupplement = (id: string) => {
+  const toggleSupplement = (suppId: string) => {
     const nextSupps = supplements.map(s =>
-      s.id === id ? { ...s, completed: !s.completed } : s
+      s.id === suppId ? { ...s, completed: !s.completed } : s
     );
     setSupplements(nextSupps);
     saveTelemetry({ supplements: nextSupps });
+    
+    const checkedNames = nextSupps.filter(s => s.completed).map(s => s.name);
+    syncTelemetry("supplements", checkedNames);
   };
 
   const incrementWater = () => {
     const nextWater = Math.min(12, waterLogged + 1);
     setWaterLogged(nextWater);
     saveTelemetry({ waterLogged: nextWater });
+    syncTelemetry("water", nextWater);
   };
 
   const decrementWater = () => {
     const nextWater = Math.max(0, waterLogged - 1);
     setWaterLogged(nextWater);
     saveTelemetry({ waterLogged: nextWater });
+    syncTelemetry("water", nextWater);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -380,6 +503,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
       setShowConfirmPane(false);
       setShowMealModal(false);
       setTempImage(null);
+      loadAdherenceData();
     } catch (err) {
       console.error(err);
       alert("Failed to save meal: " + (err instanceof Error ? err.message : String(err)));
@@ -402,28 +526,21 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
     
     setWeightHistory(nextHistory);
     saveTelemetry({ weight: val, weightHistory: nextHistory });
+    syncTelemetry("weight", val);
   };
 
   const handleStepsChange = (val: number) => {
     setStepsLogged(val);
     saveTelemetry({ stepsLogged: val });
+    syncTelemetry("steps", val);
   };
 
   const handleCardioChange = (val: number) => {
     setCardioLogged(val);
     saveTelemetry({ cardioLogged: val });
+    syncTelemetry("cardio", val);
   };
 
-  // Mock heatmap data
-  const mockHeatmapData = Array.from({ length: 30 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dStr = d.toISOString().split('T')[0];
-    return {
-      date: dStr,
-      score: i === 0 ? scoreMetrics.totalScore : Math.floor(Math.random() * 30) + 70
-    };
-  });
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -516,7 +633,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
             <div className="w-12 h-12 rounded-2xl bg-status-orange/15 border border-status-orange/35 flex items-center justify-center text-status-orange mb-4 shadow-sm">
               <Flame className="w-6 h-6 text-status-orange fill-status-orange/10 animate-pulse" />
             </div>
-            <p className="text-5xl font-black text-white tracking-tighter">12</p>
+            <p className="text-5xl font-black text-white tracking-tighter">{streak}</p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-extrabold mt-1.5">Days Adherence Streak</p>
             <span className="text-[9px] text-status-orange font-bold mt-1.5 bg-status-orange/10 px-2 py-0.5 rounded-md border border-status-orange/20">
               Elite Status
@@ -686,10 +803,12 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
                       if (i < waterLogged) {
                         setWaterLogged(i);
                         saveTelemetry({ waterLogged: i });
+                        syncTelemetry("water", i);
                       } else {
                         const nextWater = i + 1;
                         setWaterLogged(nextWater);
                         saveTelemetry({ waterLogged: nextWater });
+                        syncTelemetry("water", nextWater);
                       }
                     }}
                   >
@@ -831,7 +950,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ onLogout }) 
         <section className="space-y-6">
           <h2 className="text-xl font-black text-white tracking-tight">Analytics & Adherence Logs</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AdherenceHeatmap scores={mockHeatmapData} />
+            <AdherenceHeatmap scores={heatmapData} startDate={createdAt} />
             <SimpleLineChart
               data={weightHistory}
               title="Biometric Weight Tracking (Last 7 Logs)"

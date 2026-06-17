@@ -69,6 +69,7 @@ interface AthleteDetail {
   dietTargetMacros: { name: string; value: number; unit: string }[];
   stepsLogged: number;
   cardioLogged: number;
+  created_at?: string;
 }
 
 interface CoachAthleteDetailProps {
@@ -339,9 +340,13 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
           <div className="flex items-center gap-3 w-full md:w-auto flex-wrap sm:flex-nowrap">
             <button
               onClick={() => {
-                const current = new Date(selectedDate + "T00:00:00");
+                const [y, m, d] = selectedDate.split("-").map(Number);
+                const current = new Date(y, m - 1, d);
                 current.setDate(current.getDate() - 1);
-                setSelectedDate(current.toISOString().split("T")[0]);
+                const yyyy = current.getFullYear();
+                const mm = String(current.getMonth() + 1).padStart(2, "0");
+                const dd = String(current.getDate()).padStart(2, "0");
+                setSelectedDate(`${yyyy}-${mm}-${dd}`);
               }}
               className="px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-white text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center"
             >
@@ -366,9 +371,13 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               onClick={() => {
                 const todayStr = getTodayStr();
                 if (selectedDate === todayStr) return;
-                const current = new Date(selectedDate + "T00:00:00");
+                const [y, m, d] = selectedDate.split("-").map(Number);
+                const current = new Date(y, m - 1, d);
                 current.setDate(current.getDate() + 1);
-                setSelectedDate(current.toISOString().split("T")[0]);
+                const yyyy = current.getFullYear();
+                const mm = String(current.getMonth() + 1).padStart(2, "0");
+                const dd = String(current.getDate()).padStart(2, "0");
+                setSelectedDate(`${yyyy}-${mm}-${dd}`);
               }}
               disabled={selectedDate === getTodayStr()}
               className={`px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-white text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center ${
@@ -665,6 +674,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               athleteName={athlete.name}
               selectedDate={selectedDate}
               onCellClick={(date) => setSelectedDate(date)}
+              startDate={athlete.created_at ? athlete.created_at.split("T")[0] : undefined}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
