@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 
 from backend.app.config.database import engine, Base
 from backend.app.models.users_model import User
-from backend.app.models.meal_logs import MealLog
+from backend.app.models.meal_log_model import MealLog
 from backend.app.models.vision_api_call import VisionApiCalls
 
 load_dotenv()
