@@ -13,6 +13,7 @@ from backend.app.schemas.dashboard_schema import (
     MealHistoryDetail,
     ChartPoint,
     HeatmapPoint,
+    TeamAnalyticsResponse,
 )
 from backend.app.models.daily_log_model import DailyLog
 
@@ -360,3 +361,60 @@ class DashboardService:
                 weights_found += 1
         weight_history.reverse()
         return weight_history
+
+    def get_team_analytics(self, coach_id: UUID) -> TeamAnalyticsResponse:
+        from backend.app.repositories.user_repository import UserRepository
+        from sqlalchemy import func
+        from datetime import date, timedelta
+
+        # Get all athletes for this coach
+        athletes = UserRepository.get_athletes_by_coach(self.db, coach_id)
+        if not athletes:
+            return TeamAnalyticsResponse(team_heatmap=[], team_trend=[])
+
+        athlete_ids = [a.id for a in athletes]
+
+        end_date = date.today()
+        start_date = end_date - timedelta(days=83)  # 12 weeks is 84 days (inclusive)
+
+        # Query average score grouped by log_date
+        daily_averages = (
+            self.db.query(
+                DailyLog.log_date,
+                func.avg(DailyLog.score).label("avg_score")
+            )
+            .filter(
+                DailyLog.athlete_id.in_(athlete_ids),
+                DailyLog.log_date >= start_date,
+                DailyLog.log_date <= end_date
+            )
+            .group_by(DailyLog.log_date)
+            .all()
+        )
+
+        team_heatmap = [
+            HeatmapPoint(
+                date=row.log_date.strftime("%Y-%m-%d"),
+                score=int(round(row.avg_score))
+            )
+            for row in daily_averages
+        ]
+
+        # Trend points for the last 7 days
+        avg_score_by_date = {row.log_date: row.avg_score for row in daily_averages}
+        team_trend = []
+        for i in range(7):
+            d = end_date - timedelta(days=6 - i)
+            val = avg_score_by_date.get(d, 0.0)
+            team_trend.append(
+                ChartPoint(
+                    date=d.strftime("%m/%d"),
+                    value=float(round(val, 1))
+                )
+            )
+
+        return TeamAnalyticsResponse(
+            team_heatmap=team_heatmap,
+            team_trend=team_trend
+        )
+

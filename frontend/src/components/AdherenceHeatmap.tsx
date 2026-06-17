@@ -136,7 +136,7 @@ export const AdherenceHeatmap: React.FC<HeatmapProps> = ({
   return (
     <div className={compact ? "" : "glass-panel p-6 rounded-3xl"}>
       {!compact && (
-        <h3 className="text-sm font-extrabold uppercase tracking-wider text-white mb-5 flex items-center gap-2">
+        <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-5 flex items-center gap-2">
           <span>📊 12-Week Adherence Heatmap</span>
           {athleteName && (
             <span className="text-xs text-muted-foreground font-normal lowercase">({athleteName})</span>

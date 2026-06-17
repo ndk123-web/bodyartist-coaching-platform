@@ -46,6 +46,37 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
     setAthletes(initialAthletes);
   }, [initialAthletes]);
 
+  const [teamHeatmap, setTeamHeatmap] = useState<{ date: string; score: number }[]>([]);
+  const [teamTrend, setTeamTrend] = useState<{ date: string; value: number }[]>([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchTeamAnalytics = async () => {
+      const coachId = useAuthStore.getState().id;
+      if (!coachId) return;
+      try {
+        setAnalyticsLoading(true);
+        const res = await fetch(`http://localhost:8000/api/v1/athlete/team-analytics/${coachId}`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch team analytics');
+        }
+        const data = await res.json();
+        setTeamHeatmap(data.team_heatmap || []);
+        setTeamTrend(data.team_trend || []);
+      } catch (err) {
+        console.error('Error fetching team analytics:', err);
+      } finally {
+        setAnalyticsLoading(false);
+      }
+    };
+    
+    if (athletes.length > 0) {
+      fetchTeamAnalytics();
+    } else {
+      setAnalyticsLoading(false);
+    }
+  }, [athletes]);
+
   const handleLogout = () => {
     onLogout();
     navigate('/');
@@ -111,10 +142,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
     : null;
   const criticalCount = athletes.filter(a => a.status === 'red' || a.status === 'orange').length;
 
-  const mockHeatmapData = Array.from({ length: 30 }, (_, i) => ({
-    date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
-    score: Math.floor(Math.random() * 40) + 60,
-  }));
+  // Team heatmap/trend loaded asynchronously
 
   // Sort athletes: flagged/red/orange first and larger, then others
   const sortedAthletes = [...athletes].sort((a, b) => {
@@ -326,24 +354,28 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1">
-                <AdherenceHeatmap scores={mockHeatmapData} />
+                {analyticsLoading ? (
+                  <div className="glass-panel p-6 rounded-3xl h-[230px] flex items-center justify-center text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                    Loading Heatmap...
+                  </div>
+                ) : (
+                  <AdherenceHeatmap scores={teamHeatmap} />
+                )}
               </div>
               <div className="lg:col-span-2">
-                <SimpleLineChart
-                  data={Array.from({ length: 7 }, (_, i) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() - (6 - i));
-                    const dStr = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
-                    return {
-                      date: dStr,
-                      value: Math.floor(Math.random() * 20) + 70,
-                    };
-                  })}
-                  title="Team Daily Scores Performance Trend"
-                  metric="Average Score (0-100)"
-                  target={75}
-                  color="primary"
-                />
+                {analyticsLoading ? (
+                  <div className="glass-panel p-6 rounded-3xl h-[230px] flex items-center justify-center text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                    Loading Trend Chart...
+                  </div>
+                ) : (
+                  <SimpleLineChart
+                    data={teamTrend}
+                    title="Team Daily Scores Performance Trend"
+                    metric="Average Score (0-100)"
+                    target={75}
+                    color="primary"
+                  />
+                )}
               </div>
             </div>
           </section>

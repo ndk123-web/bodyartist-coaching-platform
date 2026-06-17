@@ -24,7 +24,7 @@ def get_coach_athlete_detail(athlete_id: UUID, log_date: Optional[date] = None, 
     return service.get_coach_athlete_detail(athlete_id, log_date)
 
 from backend.app.schemas.water_log_schema import DailyLogResponse
-from backend.app.schemas.dashboard_schema import HeatmapPoint, ChartPoint
+from backend.app.schemas.dashboard_schema import HeatmapPoint, ChartPoint, TeamAnalyticsResponse
 from typing import List
 
 @router.get("/daily-log/{athlete_id}", response_model=DailyLogResponse, status_code=status.HTTP_200_OK)
@@ -41,3 +41,9 @@ def get_athlete_heatmap(athlete_id: UUID, db: Session = Depends(get_db)):
 def get_weight_history(athlete_id: UUID, db: Session = Depends(get_db)):
     service = DashboardService(db)
     return service.get_weight_history(athlete_id)
+
+@router.get("/team-analytics/{coach_id}", response_model=TeamAnalyticsResponse, status_code=status.HTTP_200_OK)
+def get_team_analytics(coach_id: UUID, db: Session = Depends(get_db)):
+    service = DashboardService(db)
+    return service.get_team_analytics(coach_id)
+

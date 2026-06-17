@@ -65,3 +65,9 @@ class AthleteDetailResponse(BaseModel):
     dietStepsTarget: int
     dietCardioTarget: int
     dietTargetMacros: List[Dict[str, Any]]
+
+
+class TeamAnalyticsResponse(BaseModel):
+    team_heatmap: List[HeatmapPoint]
+    team_trend: List[ChartPoint]
+
