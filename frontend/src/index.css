@@ -20,175 +20,180 @@
 }
 
 :root {
-  /* Default: Dark Theme */
+  /* Default Theme: Deep Premium Dark */
   --background: 224 71% 4%;
-  --foreground: 213 31% 91%;
+  --foreground: 213 31% 94%;
   
   --card: 224 71% 7%;
-  --card-foreground: 213 31% 95%;
+  --card-foreground: 213 31% 96%;
   --card-border: 224 50% 12%;
   
-  --primary: 263 90% 50%;
+  --primary: 263 90% 55%;
   --primary-foreground: 210 40% 98%;
   
-  --muted: 223 47% 11%;
-  --muted-foreground: 215.4 16.3% 56.9%;
+  --muted: 223 47% 10%;
+  --muted-foreground: 215.4 16.3% 62.9%;
   
   --accent: 216 34% 17%;
   --accent-foreground: 210 40% 98%;
 
-  --status-green: 142 70% 45%;
-  --status-yellow: 47 95% 50%;
-  --status-orange: 24 95% 50%;
-  --status-red: 0 84% 55%;
+  --status-green: 142 70% 48%;
+  --status-yellow: 47 95% 52%;
+  --status-orange: 24 95% 52%;
+  --status-red: 0 84% 58%;
 
-  --glass-bg: rgba(7, 10, 22, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(7, 10, 22, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.06);
 }
 
 .light {
-  /* Light Theme */
+  /* Elegant Premium Light Mode */
   --background: 210 40% 98%;
   --foreground: 224 71% 4%;
   
   --card: 0 0% 100%;
   --card-foreground: 224 71% 10%;
-  --card-border: 220 14% 88%;
+  --card-border: 220 14% 90%;
   
-  --primary: 263 90% 45%;
+  --primary: 263 90% 48%;
   --primary-foreground: 210 40% 98%;
   
-  --muted: 220 14% 92%;
-  --muted-foreground: 220 8% 46%;
+  --muted: 220 14% 94%;
+  --muted-foreground: 220 8% 50%;
   
-  --accent: 220 14% 90%;
+  --accent: 220 14% 92%;
   --accent-foreground: 224 71% 10%;
 
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(0, 0, 0, 0.05);
 }
 
-/* Custom Base Layer Transitions */
+/* Custom Base Transitions */
 body {
-  @apply bg-background text-foreground transition-colors duration-300 ease-out min-h-screen font-sans;
+  @apply bg-background text-foreground transition-colors duration-300 ease-out min-h-screen font-sans antialiased;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.02) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
-/* Custom Utilities for Premium Look */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-panel-hover:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4), 0 0 20px 0 rgba(139, 92, 246, 0.1);
-}
-
-.glow-effect {
-  position: relative;
-}
-
-.glow-effect::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--status-orange)), hsl(var(--primary)));
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.glow-effect:hover::before {
-  opacity: 0.25;
-}
-
-/* Scrollbar Customization */
+/* Scrollbar Styles */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: hsl(var(--background));
 }
-
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--card-border));
   border-radius: 9999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.5);
+  background: hsl(var(--primary) / 0.4);
 }
 
-/* Animations */
+/* Bento Cards and Glassmorphism */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 20px 40px -15px rgba(0, 0, 0, 0.5), 
+    0 0 30px -5px rgba(139, 92, 246, 0.12);
+}
+
+/* Bento custom scaling classes */
+.bento-card-red {
+  background: linear-gradient(135deg, hsl(var(--status-red) / 0.08), transparent);
+  border-color: hsl(var(--status-red) / 0.2);
+}
+.bento-card-red:hover {
+  border-color: hsl(var(--status-red) / 0.35);
+  box-shadow: 0 0 25px -5px hsl(var(--status-red) / 0.15);
+}
+
+.bento-card-orange {
+  background: linear-gradient(135deg, hsl(var(--status-orange) / 0.07), transparent);
+  border-color: hsl(var(--status-orange) / 0.18);
+}
+.bento-card-orange:hover {
+  border-color: hsl(var(--status-orange) / 0.3);
+  box-shadow: 0 0 25px -5px hsl(var(--status-orange) / 0.12);
+}
+
+.bento-card-yellow {
+  background: linear-gradient(135deg, hsl(var(--status-yellow) / 0.06), transparent);
+  border-color: hsl(var(--status-yellow) / 0.15);
+}
+.bento-card-yellow:hover {
+  border-color: hsl(var(--status-yellow) / 0.28);
+  box-shadow: 0 0 25px -5px hsl(var(--status-yellow) / 0.1);
+}
+
+.bento-card-green {
+  background: linear-gradient(135deg, hsl(var(--status-green) / 0.06), transparent);
+  border-color: hsl(var(--status-green) / 0.15);
+}
+.bento-card-green:hover {
+  border-color: hsl(var(--status-green) / 0.28);
+  box-shadow: 0 0 25px -5px hsl(var(--status-green) / 0.1);
+}
+
+/* Input Focus Glows */
+.input-focus-ring {
+  transition: all 0.25s ease;
+}
+.input-focus-ring:focus {
+  outline: none;
+  border-color: hsl(var(--primary) / 0.5);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
+}
+
+/* Scanline and Scan Animations */
+@keyframes scan {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+.animate-scan {
+  animation: scan 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.12; }
+  50% { opacity: 0.24; }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-@keyframes scan {
-  0% {
-    top: 0%;
-  }
-  50% {
-    top: 100%;
-  }
-  100% {
-    top: 0%;
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.15;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
 .animate-fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-scan {
-  animation: scan 2s linear infinite;
+/* Custom Checkbox styles */
+.custom-checkbox {
+  @apply appearance-none w-5 h-5 rounded-md border border-card-border bg-card cursor-pointer transition-all flex items-center justify-center;
 }
-
-.animate-pulse-glow {
-  animation: pulseGlow 3s ease-in-out infinite;
-}
-
-/* Bento custom scaling rules */
-.bento-card-red {
-  background: linear-gradient(135deg, hsl(var(--status-red) / 0.12), transparent);
-  border-color: hsl(var(--status-red) / 0.25);
-}
-
-.bento-card-orange {
-  background: linear-gradient(135deg, hsl(var(--status-orange) / 0.1), transparent);
-  border-color: hsl(var(--status-orange) / 0.2);
-}
-
-.bento-card-yellow {
-  background: linear-gradient(135deg, hsl(var(--status-yellow) / 0.08), transparent);
-  border-color: hsl(var(--status-yellow) / 0.15);
-}
-
-.bento-card-green {
-  background: linear-gradient(135deg, hsl(var(--status-green) / 0.08), transparent);
-  border-color: hsl(var(--status-green) / 0.15);
+.custom-checkbox:checked {
+  @apply bg-primary border-primary;
 }

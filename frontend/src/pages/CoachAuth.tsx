@@ -98,41 +98,41 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden bg-background text-foreground transition-colors duration-300">
-      {/* Background Gradient Glows */}
+      {/* Dynamic ambient backdrop glows */}
       <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-status-orange/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-status-orange/5 blur-[120px] pointer-events-none animate-pulse-glow" />
 
-      {/* Back to Portal button */}
+      {/* Navigation link */}
       <Link
         to="/"
-        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-white font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg outline-none"
+        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-white font-bold transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl outline-none"
         aria-label="Back to Portal"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Back to Portal</span>
       </Link>
 
-      {/* Form Container */}
+      {/* Glass Form Container */}
       <div className="w-full max-w-md glass-panel p-8 md:p-10 rounded-3xl z-10 animate-fade-in relative">
         <div className="absolute top-0 inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-primary via-purple-500 to-status-orange" />
         
         <div className="text-center mb-8">
-          <span className="text-[10px] uppercase tracking-widest text-primary font-black px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-            Admin Portal
+          <span className="text-[10px] uppercase tracking-widest text-primary font-black px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+            Admin Workspace
           </span>
-          <h2 className="text-3xl font-black mt-4 tracking-tight text-white">
-            {isSignUp ? 'Register Team' : 'Coach Login'}
+          <h2 className="text-3xl font-black mt-4 tracking-tight text-white leading-tight">
+            {isSignUp ? 'Register Team' : 'Coach Sign In'}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-1.5 text-xs text-muted-foreground">
             {isSignUp
-              ? 'Provision a coach group workspace'
-              : 'Sign in to monitor athlete performance logs'}
+              ? 'Provision a coach group workspace portal'
+              : 'Access athlete logs, heatmaps, and stats'}
           </p>
         </div>
 
         {error && (
           <div 
-            className="mb-6 p-4 rounded-xl bg-status-red/10 border border-status-red/20 text-status-red text-xs font-semibold flex items-start gap-2.5 animate-fade-in"
+            className="mb-6 p-4 rounded-2xl bg-status-red/10 border border-status-red/20 text-status-red text-xs font-semibold flex items-start gap-2.5 animate-fade-in"
             aria-live="polite"
           >
             <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -143,7 +143,7 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
         <form onSubmit={handleSubmit} className="space-y-5">
           {isSignUp && (
             <div className="space-y-2">
-              <label htmlFor="coach-name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+              <label htmlFor="coach-name" className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
                 Full Name
               </label>
               <div className="relative">
@@ -156,14 +156,14 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Aryan Sharma"
-                  className="w-full py-3 pl-11 pr-4 rounded-xl bg-card/40 border border-card-border focus:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/40 text-sm text-white"
+                  className="w-full py-3.5 pl-11 pr-4 rounded-2xl bg-card/40 border border-card-border focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-muted-foreground/40 text-sm text-white font-bold"
                 />
               </div>
             </div>
           )}
 
           <div className="space-y-2">
-            <label htmlFor="coach-email" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+            <label htmlFor="coach-email" className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
               Email Address
             </label>
             <div className="relative">
@@ -177,13 +177,13 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="coach@bodyartist.com"
-                className="w-full py-3 pl-11 pr-4 rounded-xl bg-card/40 border border-card-border focus:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/40 text-sm text-white"
+                className="w-full py-3.5 pl-11 pr-4 rounded-2xl bg-card/40 border border-card-border focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-muted-foreground/45 text-sm text-white font-bold"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="coach-password" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+            <label htmlFor="coach-password" className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
               Password
             </label>
             <div className="relative">
@@ -196,7 +196,7 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full py-3 pl-11 pr-4 rounded-xl bg-card/40 border border-card-border focus:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/40 text-sm text-white"
+                className="w-full py-3.5 pl-11 pr-4 rounded-2xl bg-card/40 border border-card-border focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-muted-foreground/45 text-sm text-white font-bold"
               />
             </div>
           </div>
@@ -204,10 +204,10 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
           {isSignUp && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label htmlFor="coach-invite" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                <label htmlFor="coach-invite" className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
                   Registration Invite Code
                 </label>
-                <span className="text-[10px] text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20">
+                <span className="text-[9px] text-primary font-black bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                   Use: ARTIST2026
                 </span>
               </div>
@@ -219,7 +219,7 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 placeholder="Enter workspace invite key"
-                className="w-full py-3 px-4 rounded-xl bg-card/40 border border-card-border focus:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/40 text-sm text-white"
+                className="w-full py-3.5 px-4 rounded-2xl bg-card/40 border border-card-border focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-muted-foreground/45 text-sm text-white font-bold"
               />
             </div>
           )}
@@ -227,7 +227,7 @@ export const CoachAuth: React.FC<CoachAuthProps> = ({ isSignUp, onLoginSuccess }
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 mt-6 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99]"
+            className="w-full py-4 mt-6 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99]"
           >
             {loading ? 'Authenticating...' : isSignUp ? 'Register Group Portal' : 'Authenticate & Enter'}
           </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Plus, TrendingUp, Users, Activity, AlertCircle, ArrowLeft, CheckCircle, Scale, Flame } from 'lucide-react';
+import { LogOut, Plus, TrendingUp, Users, Activity, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { AthleteCard } from '../components/AthleteCard';
 import { AdherenceHeatmap } from '../components/AdherenceHeatmap';
@@ -125,7 +125,6 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
       setTimeout(() => {
         setShowProvisionModal(false);
         setProvisionSuccess(false);
-        // Trigger a page refresh or call api to pull roster again
         window.location.reload();
       }, 1500);
     } catch (err: any) {
@@ -142,47 +141,43 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
     : null;
   const criticalCount = athletes.filter(a => a.status === 'red' || a.status === 'orange').length;
 
-  // Team heatmap/trend loaded asynchronously
-
   // Sort athletes: flagged/red/orange first and larger, then others
   const sortedAthletes = [...athletes].sort((a, b) => {
     const statusOrder = { red: 0, orange: 1, yellow: 2, green: 3 };
     return statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
   });
 
-
-
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       
-      {/* Dynamic ambient portal glows */}
-      <div className="absolute top-0 right-0 w-[50%] h-[35%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[45%] h-[35%] rounded-full bg-status-orange/5 blur-[120px] pointer-events-none animate-pulse-glow" />
+      {/* Background neon visual glows */}
+      <div className="absolute top-0 right-0 w-[50%] h-[35%] rounded-full bg-primary/5 blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[45%] h-[35%] rounded-full bg-status-orange/4 blur-[130px] pointer-events-none animate-pulse-glow" />
 
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-card-border/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      {/* Modern Dashboard Navigation */}
+      <header className="sticky top-0 z-40 glass-panel border-b border-card-border/40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-4.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-purple-600 flex items-center justify-center text-white shadow-lg">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-purple-600 flex items-center justify-center text-white shadow-md shadow-primary/20">
+              <Activity className="w-5.5 h-5.5 text-white" />
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Coaching Workspace</p>
-              <h1 className="text-lg font-black text-foreground">Coach {name || 'Dashboard'}</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Coaching Workspace</p>
+              <h1 className="text-base sm:text-lg font-black text-white">Coach {name || 'Dashboard'}</h1>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowProvisionModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer text-xs"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-extrabold hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer text-xs"
             >
               <Plus className="w-4 h-4 text-white" />
               Add Athlete
             </button>
             <button
               onClick={handleLogout}
-              className="p-2.5 rounded-xl text-muted-foreground hover:bg-card hover:text-white border border-transparent hover:border-card-border transition-all cursor-pointer"
+              className="p-2.5 rounded-xl text-muted-foreground hover:bg-card hover:text-white border border-transparent hover:border-card-border transition-all cursor-pointer flex items-center justify-center"
               title="Logout"
             >
               <LogOut className="w-5 h-5" />
@@ -191,19 +186,19 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
         </div>
       </header>
 
-      {/* Provision Athlete Popup Modal */}
+      {/* Provision Athlete Modal */}
       {showProvisionModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="glass-panel rounded-3xl p-6 md:p-8 max-w-md w-full relative shadow-2xl animate-fade-in border-white/10">
             <div className="absolute top-0 inset-x-0 h-1 rounded-t-3xl bg-gradient-to-r from-primary to-purple-600" />
             
-            <h2 className="text-2xl font-black text-foreground mb-2">Provision Athlete</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-6">Create credentials for a new athlete workspace. This athlete will be bound to your roster and subject to PostgreSQL isolated query checks.</p>
+            <h2 className="text-2xl font-black text-white mb-2">Provision Athlete Workspace</h2>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-6">Create login credentials for a new athlete workspace. This athlete roster profile will be linked to your coach account.</p>
 
             {provisionSuccess ? (
-              <div className="p-4 rounded-2xl bg-status-green/10 border border-status-green/30 text-status-green text-xs font-semibold flex items-center gap-2">
+              <div className="p-4 rounded-2xl bg-status-green/10 border border-status-green/20 text-status-green text-xs font-semibold flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
-                <span>Athlete provisioned successfully! Loading workspace...</span>
+                <span>Athlete workspace provisioned successfully! Loading roster...</span>
               </div>
             ) : (
               <form onSubmit={handleProvision} className="space-y-4">
@@ -213,7 +208,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
                     type="text"
                     value={provName}
                     onChange={(e) => setProvName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
+                    className="w-full px-4 py-3 rounded-2xl bg-card border border-card-border focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none text-white font-bold text-sm"
                     placeholder="Enter athlete's name"
                   />
                 </div>
@@ -224,7 +219,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
                     type="email"
                     value={provEmail}
                     onChange={(e) => setProvEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
+                    className="w-full px-4 py-3 rounded-2xl bg-card border border-card-border focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none text-white font-bold text-sm"
                     placeholder="athlete@example.com"
                   />
                 </div>
@@ -235,13 +230,13 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
                     type="password"
                     value={provPassword}
                     onChange={(e) => setProvPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-card-border focus:border-primary/50 text-foreground font-bold text-sm focus:outline-none"
-                    placeholder="Set athlete initial password"
+                    className="w-full px-4 py-3 rounded-2xl bg-card border border-card-border focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none text-white font-bold text-sm"
+                    placeholder="Set initial athlete password"
                   />
                 </div>
 
                 {provisionError && (
-                  <div className="p-3.5 rounded-xl bg-status-red/10 border border-status-red/30 text-status-red text-[11px] font-bold flex items-start gap-2.5">
+                  <div className="p-3.5 rounded-2xl bg-status-red/10 border border-status-red/20 text-status-red text-[11px] font-bold flex items-start gap-2.5">
                     <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>{provisionError}</span>
                   </div>
@@ -259,7 +254,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
                     type="submit"
                     className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold hover:shadow-lg transition-all cursor-pointer text-xs"
                   >
-                    Create Workspace
+                    Create Account
                   </button>
                 </div>
               </form>
@@ -268,44 +263,44 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
         </div>
       )}
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-10 relative z-10 space-y-10">
+      {/* Main Container */}
+      <main className="max-w-7xl mx-auto px-6 py-8 relative z-10 space-y-8">
         
-        {/* Team Overview Bento Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="glass-panel p-6 rounded-3xl bg-gradient-to-br from-primary/5 to-transparent flex flex-col justify-between min-h-[110px]">
+        {/* Aggregated Overview Bento Block */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="glass-panel p-5.5 rounded-3xl bg-gradient-to-br from-primary/5 to-transparent flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Active Roster Size</span>
-              <Users className="w-5 h-5 text-primary" />
+              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Active Roster Size</span>
+              <Users className="w-4.5 h-4.5 text-primary" />
             </div>
-            <p className="text-3xl font-black text-foreground">{athletes.length}</p>
+            <p className="text-3xl font-black text-white">{athletes.length}</p>
           </div>
 
-          <div className="glass-panel p-6 rounded-3xl bg-gradient-to-br from-status-green/5 to-transparent flex flex-col justify-between min-h-[110px]">
+          <div className="glass-panel p-5.5 rounded-3xl bg-gradient-to-br from-status-green/5 to-transparent flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Team Avg Score</span>
-              <Activity className="w-5 h-5 text-status-green" />
+              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Team Avg Score</span>
+              <Activity className="w-4.5 h-4.5 text-status-green" />
             </div>
-            <p className="text-3xl font-black text-foreground">{avgScore}</p>
+            <p className="text-3xl font-black text-white">{avgScore}</p>
           </div>
 
-          <div className="glass-panel p-6 rounded-3xl bg-gradient-to-br from-status-orange/5 to-transparent flex flex-col justify-between min-h-[110px]">
+          <div className="glass-panel p-5.5 rounded-3xl bg-gradient-to-br from-status-orange/5 to-transparent flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Top Streak</span>
-              <TrendingUp className="w-5 h-5 text-status-orange" />
+              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Top Streak</span>
+              <TrendingUp className="w-4.5 h-4.5 text-status-orange" />
             </div>
             <div>
-              <p className="text-3xl font-black text-foreground">{bestStreakAthlete?.streak || 0}</p>
+              <p className="text-3xl font-black text-white">{bestStreakAthlete?.streak || 0}</p>
               {bestStreakAthlete && (
-                <p className="text-[9px] text-muted-foreground font-bold uppercase mt-1">Athlete: {bestStreakAthlete.name}</p>
+                <p className="text-[9px] text-muted-foreground font-bold uppercase mt-1 truncate">Athlete: {bestStreakAthlete.name}</p>
               )}
             </div>
           </div>
 
-          <div className="glass-panel p-6 rounded-3xl bg-gradient-to-br from-status-red/5 to-transparent flex flex-col justify-between min-h-[110px]">
+          <div className="glass-panel p-5.5 rounded-3xl bg-gradient-to-br from-status-red/5 to-transparent flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Needs Attention</span>
-              <AlertCircle className={`w-5 h-5 ${criticalCount > 0 ? 'text-status-red animate-pulse' : 'text-status-green'}`} />
+              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Needs Attention</span>
+              <AlertCircle className={`w-4.5 h-4.5 ${criticalCount > 0 ? 'text-status-red animate-pulse' : 'text-status-green'}`} />
             </div>
             <p className={`text-3xl font-black ${criticalCount > 0 ? 'text-status-red' : 'text-status-green'}`}>
               {criticalCount}
@@ -313,17 +308,17 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
           </div>
         </section>
 
-        {/* Athletes Bento Grid */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between border-b border-card-border/50 pb-4">
-            <h2 className="text-xl font-black text-foreground tracking-tight">Athlete Progress Trackers</h2>
-            <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Flagged Profiles Promoted</span>
+        {/* Athletes List Roster */}
+        <section className="space-y-5">
+          <div className="flex items-center justify-between border-b border-card-border/40 pb-3.5">
+            <h2 className="text-lg font-black text-white tracking-tight uppercase">Athlete Compliance Trackers</h2>
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Flagged Profiles Promoted</span>
           </div>
           
           {athletes.length === 0 ? (
             <div className="glass-panel p-16 rounded-3xl text-center">
               <Users className="w-12 h-12 text-muted-foreground/35 mx-auto mb-4" />
-              <p className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-4">No Athletes Bound to Workspace</p>
+              <p className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-4">No Athletes Connected to Roster</p>
               <button
                 onClick={() => setShowProvisionModal(true)}
                 className="px-6 py-3 rounded-2xl bg-primary text-white font-bold hover:shadow-lg transition-all cursor-pointer text-xs"
@@ -332,7 +327,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {sortedAthletes.map((athlete) => (
                 <AthleteCard
                   key={athlete.id}
@@ -345,11 +340,11 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({
           )}
         </section>
 
-        {/* Team-wide Adherence Analytics Section */}
+        {/* Team-wide Compliance Visual Charts */}
         {athletes.length > 0 && (
-          <section className="space-y-6">
-            <div className="border-b border-card-border/50 pb-4">
-              <h2 className="text-xl font-black text-foreground tracking-tight">Team-wide Analytics Overview</h2>
+          <section className="space-y-5">
+            <div className="border-b border-card-border/40 pb-3.5">
+              <h2 className="text-lg font-black text-white tracking-tight uppercase">Team Analytics Logs</h2>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

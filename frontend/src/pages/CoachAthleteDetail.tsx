@@ -5,16 +5,11 @@ import {
   Scale,
   Flame,
   Activity,
-  Users,
   LogOut,
-  Trash2,
   CheckCircle,
   AlertCircle,
-  Plus,
-  ShieldCheck,
   Droplet,
 } from "lucide-react";
-import { useAuthStore } from "../store/useAuthStore";
 import { AdherenceHeatmap } from "../components/AdherenceHeatmap";
 import { SimpleLineChart } from "../components/SimpleLineChart";
 
@@ -81,7 +76,6 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
 }) => {
   const { athleteId } = useParams<{ athleteId: string }>();
   const navigate = useNavigate();
-  const coachName = useAuthStore((state) => state.name);
   const [athlete, setAthlete] = useState<AthleteDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -104,9 +98,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
   const [newMacroName, setNewMacroName] = useState<string>('');
   const [newMacroValue, setNewMacroValue] = useState<number>(0);
   const [newMacroUnit, setNewMacroUnit] = useState<string>('g');
-  const [suppsList, setSuppsList] = useState<
-    { name: string; required: boolean }[]
-  >([]);
+  const [suppsList, setSuppsList] = useState<{ name: string; required: boolean }[]>([]);
   const [newSuppName, setNewSuppName] = useState<string>("");
   const [newSuppRequired, setNewSuppRequired] = useState<boolean>(true);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
@@ -216,7 +208,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
       setTimeout(() => setSaveSuccess(false), 2000);
 
       // Reload profile to refresh calculations based on new targets
-      fetchAthleteDetail();
+      fetchAthleteDetail(selectedDate);
     } catch (err: any) {
       alert(err.message || "An error occurred while saving targets.");
     } finally {
@@ -243,8 +235,8 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
   if (error || !athlete) {
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 text-center">
-        <AlertCircle className="w-14 h-14 text-status-red mb-4" />
-        <h2 className="text-xl font-black text-foreground mb-2">
+        <AlertCircle className="w-14 h-14 text-status-red mb-4 animate-pulse" />
+        <h2 className="text-xl font-black text-white mb-2">
           Workspace Load Error
         </h2>
         <p className="text-sm text-muted-foreground max-w-md mb-6">
@@ -262,13 +254,13 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      {/* Ambient background glows */}
+      {/* Background ambient glows */}
       <div className="absolute top-0 left-0 w-[50%] h-[35%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[40%] h-[35%] rounded-full bg-status-orange/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[40%] h-[35%] rounded-full bg-status-orange/4 blur-[120px] pointer-events-none" />
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-card-border/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      {/* Roster Header */}
+      <header className="sticky top-0 z-40 glass-panel border-b border-card-border/40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-4.5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/coach/dashboard")}
@@ -278,16 +270,16 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">
-                Athletic Analytics Hub
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+                Athlete Profile Insight
               </p>
-              <h1 className="text-xl font-black text-foreground">{athlete.name}</h1>
+              <h1 className="text-lg font-black text-white leading-none mt-1">{athlete.name}</h1>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <span
-              className={`px-3 py-1.5 rounded-xl border text-[10px] uppercase tracking-widest font-extrabold ${
+              className={`px-3 py-1.5 rounded-xl border text-[10px] uppercase tracking-widest font-black ${
                 athlete.status === "green"
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
                   : athlete.status === "yellow"
@@ -297,11 +289,11 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                       : "bg-rose-500/10 text-rose-400 border-rose-500/25"
               }`}
             >
-              {athlete.status.toUpperCase()} STATUS
+              {athlete.status} Status
             </span>
             <button
               onClick={handleLogout}
-              className="p-2.5 rounded-xl text-muted-foreground hover:bg-card hover:text-white border border-transparent hover:border-card-border transition-all cursor-pointer"
+              className="p-2.5 rounded-xl text-muted-foreground hover:bg-card hover:text-white border border-transparent hover:border-card-border transition-all cursor-pointer flex items-center justify-center"
               title="Logout"
             >
               <LogOut className="w-5 h-5" />
@@ -311,16 +303,17 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8 relative z-10 space-y-8">
-        {/* Date Selector & History Banner */}
-        <div className="glass-panel p-5 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border border-card-border/50 bg-gradient-to-r from-card/30 via-transparent to-transparent backdrop-blur-xl">
+      <main className="max-w-7xl mx-auto px-6 py-8 relative z-10 space-y-8 animate-fade-in">
+        
+        {/* Date Selector Navigation Bar */}
+        <div className="glass-panel p-5 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 bg-gradient-to-r from-card/30 via-transparent to-transparent backdrop-blur-xl">
           <div className="flex items-center gap-4 text-left w-full md:w-auto">
             <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20">
               <Activity className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-extrabold">Adherence History Log</p>
-              <h3 className="text-lg font-black text-foreground flex items-center gap-2 mt-0.5">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-extrabold">Audit Timeline logs</p>
+              <h3 className="text-base font-black text-white flex items-center gap-2 mt-0.5">
                 {selectedDate === getTodayStr() ? (
                   <span className="flex items-center gap-1.5">
                     Today <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
@@ -348,7 +341,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                 const dd = String(current.getDate()).padStart(2, "0");
                 setSelectedDate(`${yyyy}-${mm}-${dd}`);
               }}
-              className="px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-foreground text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center"
+              className="px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center"
             >
               ← Prev Day
             </button>
@@ -363,7 +356,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                     setSelectedDate(e.target.value);
                   }
                 }}
-                className="w-full px-5 py-2.5 bg-card border border-card-border rounded-2xl text-xs text-foreground font-extrabold focus:outline-none focus:border-primary cursor-pointer hover:border-white/10 select-none appearance-none"
+                className="w-full px-5 py-2.5 bg-card border border-card-border rounded-2xl text-xs text-white font-extrabold focus:outline-none focus:border-primary cursor-pointer hover:border-white/10 select-none appearance-none"
               />
             </div>
 
@@ -380,8 +373,8 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                 setSelectedDate(`${yyyy}-${mm}-${dd}`);
               }}
               disabled={selectedDate === getTodayStr()}
-              className={`px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-foreground text-xs font-black rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center ${
-                selectedDate === getTodayStr() ? "opacity-40 cursor-not-allowed border-transparent" : ""
+              className={`px-4 py-3 bg-card border border-card-border hover:border-white/10 hover:bg-card/60 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer flex-1 sm:flex-none text-center ${
+                selectedDate === getTodayStr() ? "opacity-35 cursor-not-allowed border-transparent" : ""
               }`}
             >
               Next Day →
@@ -389,15 +382,16 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
           </div>
         </div>
 
-        {/* Key metrics grid */}
+        {/* Top Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Today's Score */}
+          
+          {/* Adherence Score Card */}
           <div className="glass-panel p-6 rounded-3xl flex flex-col justify-between min-h-[120px]">
-            <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider mb-2">
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider mb-2">
               Adherence Score
             </p>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-black text-foreground">
+              <span className="text-4xl font-black text-white">
                 {athlete.score}
               </span>
               <span className="text-xs text-muted-foreground font-bold">
@@ -422,228 +416,231 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
 
           {/* Adherence Streak */}
           <div className="glass-panel p-6 rounded-3xl flex flex-col justify-between min-h-[120px]">
-            <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider mb-2">
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider mb-2">
               Consistencies
             </p>
             <div className="flex items-center gap-2 text-status-orange font-black">
-              <Flame className="w-8 h-8 fill-status-orange/10" />
-              <span className="text-4xl text-foreground">{athlete.streak}</span>
+              <Flame className="w-7 h-7 fill-status-orange/10 animate-pulse" />
+              <span className="text-4xl text-white">{athlete.streak}</span>
               <span className="text-xs text-muted-foreground font-bold">
                 days streak
               </span>
             </div>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase mt-3">
-              Verified checkoffs
+            <p className="text-[9px] text-muted-foreground font-bold uppercase mt-3">
+              Adherence checkoffs verified
             </p>
           </div>
 
           {/* Latest Biometrics */}
           <div className="glass-panel p-6 rounded-3xl flex flex-col justify-between min-h-[120px]">
-            <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider mb-2">
-              Latest Biometrics
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider mb-2">
+              Latest Weigh-In
             </p>
-            <div className="flex items-baseline gap-2 text-foreground">
+            <div className="flex items-baseline gap-2 text-white">
               <Scale className="w-6 h-6 text-status-orange" />
               <span className="text-4xl font-black">{athlete.weight}</span>
               <span className="text-xs text-muted-foreground font-bold">
                 KG
               </span>
             </div>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase mt-3">
-              Time-series tracked
+            <p className="text-[9px] text-muted-foreground font-bold uppercase mt-3">
+              Time-series tracking active
             </p>
           </div>
         </div>
 
-        {/* Configuration & Charts Bento section */}
+        {/* Configuration & Analytics Bento Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Target Config Form */}
-          <div className="glass-panel p-6 rounded-3xl lg:col-span-1 space-y-5">
-            <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
-                Diet Targets Builder
-              </h3>
-              <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
-                Customize daily compliance variables
-              </p>
-            </div>
-
-            <div className="space-y-4 text-xs font-bold">
-              {/* Meals Target */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                  Meals Target Count
-                </label>
-                <input
-                  type="number"
-                  value={dietMealsTarget}
-                  onChange={(e) => setDietMealsTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
-                />
+          
+          {/* Target Config Builder Form */}
+          <div className="glass-panel p-6 rounded-3xl lg:col-span-1 space-y-5 flex flex-col justify-between">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                  Diet & Targets Builder
+                </h3>
+                <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
+                  Configure compliance thresholds & targets
+                </p>
               </div>
 
-              {/* Water Target */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                  Water Intake Target (Glasses)
-                </label>
-                <input
-                  type="number"
-                  value={dietWaterTarget}
-                  onChange={(e) => setDietWaterTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              {/* Steps Target */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                  Daily Steps Target
-                </label>
-                <input
-                  type="number"
-                  value={dietStepsTarget}
-                  onChange={(e) => setDietStepsTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              {/* Cardio Target */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                  Cardio Active Target (Mins)
-                </label>
-                <input
-                  type="number"
-                  value={dietCardioTarget}
-                  onChange={(e) => setDietCardioTarget(Number(e.target.value))}
-                  className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              {/* Target Macros Config Builder */}
-              <div className="space-y-3 pt-2 border-t border-card-border/60">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Configure Target Macros (JSONB)</span>
-                
-                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
-                  {macrosList.map((macro, mIdx) => (
-                    <div key={mIdx} className="flex items-center justify-between p-2 rounded-xl bg-card border border-card-border">
-                      <span className="text-[11px] truncate text-foreground font-bold">{macro.name}</span>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-[10px] text-muted-foreground font-semibold">
-                          {macro.value} {macro.unit}
-                        </span>
-                        <button 
-                          type="button"
-                          onClick={() => handleRemoveMacro(mIdx)}
-                          className="text-status-red hover:text-white text-[10px] px-1 font-bold"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Name (e.g. Protein)"
-                    value={newMacroName}
-                    onChange={(e) => setNewMacroName(e.target.value)}
-                    className="w-1/3 py-2 px-3 rounded-xl bg-card border border-card-border text-xs text-foreground focus:outline-none"
-                  />
+              <div className="space-y-3.5 text-xs font-bold">
+                {/* Meals Target */}
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Meals Target Count
+                  </label>
                   <input
                     type="number"
-                    placeholder="Value"
-                    value={newMacroValue || ''}
-                    onChange={(e) => setNewMacroValue(Number(e.target.value))}
-                    className="w-1/4 py-2 px-2 rounded-xl bg-card border border-card-border text-xs text-foreground focus:outline-none"
+                    value={dietMealsTarget}
+                    onChange={(e) => setDietMealsTarget(Number(e.target.value))}
+                    className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
-                  <select
-                    value={newMacroUnit}
-                    onChange={(e) => setNewMacroUnit(e.target.value)}
-                    className="w-1/4 py-2 px-1 rounded-xl bg-card border border-card-border text-xs text-foreground bg-card focus:outline-none"
-                  >
-                    <option value="g">g</option>
-                    <option value="mg">mg</option>
-                    <option value="kcal">kcal</option>
-                    <option value="ml">ml</option>
-                  </select>
-                  <button
-                    type="button"
-                    onClick={handleAddMacro}
-                    className="px-3 rounded-xl bg-primary text-white font-extrabold flex items-center justify-center cursor-pointer text-xs"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Supplement checklist builder */}
-              <div className="space-y-3 pt-2">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                  Configure Supplements
-                </span>
-
-                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
-                  {suppsList.map((supp, sIdx) => (
-                    <div
-                      key={sIdx}
-                      className="flex items-center justify-between p-2 rounded-xl bg-card border border-card-border"
-                    >
-                      <span className="text-[11px] truncate text-white">
-                        {supp.name}
-                      </span>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span
-                          className={`text-[8px] px-1 rounded font-black uppercase ${supp.required ? "bg-primary/20 text-primary" : "bg-card border border-card-border text-muted-foreground"}`}
-                        >
-                          {supp.required ? "Req" : "Opt"}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSupp(sIdx)}
-                          className="text-status-red hover:text-white text-[10px] px-1 font-bold"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  ))}
                 </div>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Add supplement name"
-                    value={newSuppName}
-                    onChange={(e) => setNewSuppName(e.target.value)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-card border border-card-border text-xs text-foreground focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddSupp}
-                    className="px-3 rounded-xl bg-primary text-white font-extrabold flex items-center justify-center cursor-pointer text-xs"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 pt-1 select-none">
-                  <input
-                    type="checkbox"
-                    id="new-supp-required"
-                    checked={newSuppRequired}
-                    onChange={(e) => setNewSuppRequired(e.target.checked)}
-                    className="cursor-pointer accent-primary"
-                  />
-                  <label
-                    htmlFor="new-supp-required"
-                    className="text-[10px] text-muted-foreground cursor-pointer"
-                  >
-                    Required for Adherence Score
+                {/* Water Target */}
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Water Target (Glasses)
                   </label>
+                  <input
+                    type="number"
+                    value={dietWaterTarget}
+                    onChange={(e) => setDietWaterTarget(Number(e.target.value))}
+                    className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  />
+                </div>
+
+                {/* Steps Target */}
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Daily Steps Target
+                  </label>
+                  <input
+                    type="number"
+                    value={dietStepsTarget}
+                    onChange={(e) => setDietStepsTarget(Number(e.target.value))}
+                    className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  />
+                </div>
+
+                {/* Cardio Target */}
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Cardio Target (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    value={dietCardioTarget}
+                    onChange={(e) => setDietCardioTarget(Number(e.target.value))}
+                    className="w-full py-2.5 px-4 rounded-xl bg-card border border-card-border text-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  />
+                </div>
+
+                {/* Macros Builder */}
+                <div className="space-y-3 pt-2.5 border-t border-card-border/60">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Target Macros (JSONB)</span>
+                  
+                  <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                    {macrosList.map((macro, mIdx) => (
+                      <div key={mIdx} className="flex items-center justify-between p-2 rounded-xl bg-card/50 border border-card-border">
+                        <span className="text-[11px] truncate text-white font-bold">{macro.name}</span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-[10px] text-muted-foreground font-semibold">
+                            {macro.value} {macro.unit}
+                          </span>
+                          <button 
+                            type="button"
+                            onClick={() => handleRemoveMacro(mIdx)}
+                            className="text-status-red hover:text-white text-[12px] px-1 font-bold cursor-pointer"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Macro Name"
+                      value={newMacroName}
+                      onChange={(e) => setNewMacroName(e.target.value)}
+                      className="w-1/3 py-2 px-3 rounded-xl bg-card border border-card-border text-[11px] text-white focus:outline-none focus:border-primary"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Value"
+                      value={newMacroValue || ''}
+                      onChange={(e) => setNewMacroValue(Number(e.target.value))}
+                      className="w-1/4 py-2 px-2 rounded-xl bg-card border border-card-border text-[11px] text-white focus:outline-none focus:border-primary"
+                    />
+                    <select
+                      value={newMacroUnit}
+                      onChange={(e) => setNewMacroUnit(e.target.value)}
+                      className="w-1/4 py-2 px-1 rounded-xl bg-card border border-card-border text-[11px] text-white bg-card focus:outline-none"
+                    >
+                      <option value="g">g</option>
+                      <option value="mg">mg</option>
+                      <option value="kcal">kcal</option>
+                      <option value="ml">ml</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleAddMacro}
+                      className="px-3 rounded-xl bg-primary text-white font-extrabold flex items-center justify-center cursor-pointer text-xs"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Supplement checklist builder */}
+                <div className="space-y-3 pt-2.5 border-t border-card-border/60">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Required Supplements
+                  </span>
+
+                  <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                    {suppsList.map((supp, sIdx) => (
+                      <div
+                        key={sIdx}
+                        className="flex items-center justify-between p-2 rounded-xl bg-card/50 border border-card-border"
+                      >
+                        <span className="text-[11px] truncate text-white">
+                          {supp.name}
+                        </span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span
+                            className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase ${supp.required ? "bg-primary/10 text-primary border border-primary/20" : "bg-card border border-card-border text-muted-foreground"}`}
+                          >
+                            {supp.required ? "Req" : "Opt"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSupp(sIdx)}
+                            className="text-status-red hover:text-white text-[12px] px-1 font-bold cursor-pointer"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Add supplement name"
+                      value={newSuppName}
+                      onChange={(e) => setNewSuppName(e.target.value)}
+                      className="flex-1 py-2 px-3 rounded-xl bg-card border border-card-border text-[11px] text-white focus:outline-none focus:border-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSupp}
+                      className="px-3 rounded-xl bg-primary text-white font-extrabold flex items-center justify-center cursor-pointer text-xs"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1 select-none">
+                    <input
+                      type="checkbox"
+                      id="new-supp-required"
+                      checked={newSuppRequired}
+                      onChange={(e) => setNewSuppRequired(e.target.checked)}
+                      className="w-4 h-4 cursor-pointer accent-primary rounded border-card-border"
+                    />
+                    <label
+                      htmlFor="new-supp-required"
+                      className="text-[10px] text-muted-foreground cursor-pointer"
+                    >
+                      Required for Adherence Score
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -652,22 +649,19 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               <button
                 onClick={handleSaveTargets}
                 disabled={saveLoading}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold hover:shadow-lg transition-all cursor-pointer text-xs flex items-center justify-center"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold hover:shadow-lg transition-all cursor-pointer text-xs flex items-center justify-center hover:scale-[1.01]"
               >
-                {saveLoading
-                  ? "Saving target configs..."
-                  : "Save Targets Diet Configuration"}
+                {saveLoading ? "Saving targets..." : "Save Target Configurations"}
               </button>
               {saveSuccess && (
-                <div className="p-2.5 rounded-xl bg-status-green/10 border border-status-green/30 text-status-green text-[10px] font-semibold text-center flex items-center justify-center gap-1">
-                  <CheckCircle className="w-3.5 h-3.5" /> Targets successfully
-                  saved!
+                <div className="p-2.5 rounded-xl bg-status-green/10 border border-status-green/20 text-status-green text-[10px] font-semibold text-center flex items-center justify-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5" /> Targets successfully saved!
                 </div>
               )}
             </div>
           </div>
 
-          {/* Charts & Heatmap */}
+          {/* Charts & Heatmap Panel */}
           <div className="lg:col-span-2 space-y-6">
             <AdherenceHeatmap
               scores={athlete.heatmapData}
@@ -698,14 +692,15 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
 
         {/* Daily Compliance Audit & Meal History Timeline */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Daily Activity Audit (takes 1 column) */}
+          
+          {/* Daily Activity Audit */}
           <div className="glass-panel p-6 rounded-3xl lg:col-span-1 space-y-6 flex flex-col justify-between">
             <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+              <h3 className="text-sm font-black uppercase tracking-wider text-white">
                 Daily Compliance Audit
               </h3>
               <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
-                Physical telemetry and checkoff log
+                Physical telemetry and checked requirements
               </p>
             </div>
 
@@ -713,7 +708,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               {/* Hydration Audit */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-foreground flex items-center gap-1.5">
+                  <span className="text-white flex items-center gap-1.5">
                     <Droplet className="w-4 h-4 text-status-yellow fill-status-yellow/10" />
                     Water Intake
                   </span>
@@ -734,7 +729,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               {/* Steps Audit */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-foreground flex items-center gap-1.5">
+                  <span className="text-white flex items-center gap-1.5">
                     <Activity className="w-4 h-4 text-primary" />
                     Steps Tracked
                   </span>
@@ -755,7 +750,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
               {/* Cardio Audit */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-foreground flex items-center gap-1.5">
+                  <span className="text-white flex items-center gap-1.5">
                     <Flame className="w-4 h-4 text-status-orange" />
                     Cardio Duration
                   </span>
@@ -773,13 +768,13 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                 </div>
               </div>
 
-              {/* Supplement checklist audit */}
+              {/* Supplement Checklist */}
               <div className="space-y-3 pt-3 border-t border-card-border/60">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-extrabold block">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-black block">
                   Supplements Checkoffs
                 </span>
 
-                <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
                   {athlete.supplements && athlete.supplements.length > 0 ? (
                     athlete.supplements.map((supp, sIdx) => (
                       <div
@@ -794,7 +789,7 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                           {supp.completed ? (
                             <CheckCircle className="w-4 h-4 text-status-green flex-shrink-0" />
                           ) : (
-                            <AlertCircle className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
+                            <AlertCircle className="w-4 h-4 text-muted-foreground/35 flex-shrink-0" />
                           )}
                           <span className={`truncate ${supp.completed ? "line-through text-status-green" : "text-white"}`}>
                             {supp.name}
@@ -819,65 +814,59 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
             </div>
           </div>
 
-          {/* Meals logs feed timeline (takes 2 columns) */}
+          {/* Meals Timeline logs */}
           <div className="glass-panel p-6 rounded-3xl lg:col-span-2 space-y-6">
             <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
-                Adherence Meal History Timeline
+              <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                Meal Compliance Timeline
               </h3>
               <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
-                Chronological feed of athlete uploaded meals
+                Uploaded meals, raw vision outputs, and macro estimates
               </p>
             </div>
 
             {athlete.mealHistory && athlete.mealHistory.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {athlete.mealHistory.map((meal) => (
                   <div
                     key={meal.id}
-                    className="p-4 rounded-2xl bg-card/30 border border-card-border hover:border-white/10 transition-all flex gap-4"
+                    className="p-4.5 rounded-2xl bg-card/25 border border-card-border hover:border-white/10 transition-all flex gap-4"
                   >
                     {meal.photo ? (
                       <img
                         src={meal.photo}
                         alt={meal.food}
-                        className="w-20 h-20 rounded-xl object-cover border border-card-border flex-shrink-0"
+                        className="w-18 h-18 rounded-xl object-cover border border-card-border flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-xl bg-card border border-card-border flex items-center justify-center text-3xl flex-shrink-0">
+                      <div className="w-18 h-18 rounded-xl bg-card border border-card-border flex items-center justify-center text-2xl flex-shrink-0">
                         🍳
                       </div>
                     )}
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-foreground text-sm truncate">
+                        <div className="flex items-center justify-between gap-1">
+                          <h4 className="font-extrabold text-white text-sm truncate">
                             {meal.food}
                           </h4>
                           {meal.isEdited && (
-                            <span className="text-[8px] bg-primary/10 border border-primary/20 text-primary font-black px-1.5 rounded uppercase">
+                            <span className="text-[8px] bg-primary/10 border border-primary/20 text-primary font-black px-1.5 rounded uppercase flex-shrink-0">
                               Edited
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
+                        <p className="text-[10px] text-muted-foreground font-semibold mt-1">
                           {meal.time} • Confidence: {meal.confidence}%
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between text-xs font-extrabold mt-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-primary">
-                            P: {meal.macros.p}g
-                          </span>
-                          <span className="text-status-yellow">
-                            C: {meal.macros.c}g
-                          </span>
-                          <span className="text-status-orange">
-                            F: {meal.macros.f}g
-                          </span>
+                      <div className="flex items-center justify-between text-xs font-extrabold mt-3.5 pt-1.5 border-t border-card-border/30">
+                        <div className="flex items-center gap-2">
+                          <span className="text-primary">P:{meal.macros.p}g</span>
+                          <span className="text-status-yellow">C:{meal.macros.c}g</span>
+                          <span className="text-status-orange">F:{meal.macros.f}g</span>
                         </div>
-                        <span className="text-foreground bg-card border border-card-border px-2 py-0.5 rounded-md text-[10px]">
+                        <span className="text-white bg-card border border-card-border px-2 py-0.5 rounded-md text-[9px]">
                           {meal.calories} kcal
                         </span>
                       </div>
@@ -886,10 +875,10 @@ export const CoachAthleteDetail: React.FC<CoachAthleteDetailProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="py-10 text-center my-auto">
-                <Users className="w-10 h-10 text-muted-foreground/45 mx-auto mb-3" />
+              <div className="py-12 text-center my-auto">
+                <AlertCircle className="w-10 h-10 text-muted-foreground/35 mx-auto mb-3" />
                 <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  No meal records found for this date.
+                  No meals logged on this date
                 </p>
               </div>
             )}
